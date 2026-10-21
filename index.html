@@ -108,7 +108,10 @@ const FORMS={
  sh:{col:"shoots",title:"جلسة تصوير",st:["مجدولة","تمت","مؤجلة"],f:[["date","التاريخ","date"],["time","الوقت","text"],["loc","الموقع","text"],["epId","الحلقة","epsel"],["crew","الفريق والمشاركون","text"],["gear","المعدات (سطر لكل عنصر)","area"],["run","ترتيب الفقرات (سطر لكل فقرة)","area"],["notes","ملاحظات المخرج","area"]]},
  sg:{col:"segs",title:"فقرة",st:["قيد الإعداد","جاهزة","تم تصويرها"],f:[["title","عنوان الفقرة","text"],["epId","الحلقة","epsel"],["ord","الترتيب (رقم)","text"],["dur","المدة بالدقائق","text"],["notes","ملاحظات الفقرة","area"]]}
 };
-
+function nm(id) {
+  const member = (S.mem || []).find(m => m.id === id);
+  return member ? member.name : "";
+}
 function openForm(k,rec,pre){
  const F=FORMS[k],r=rec||pre||{};
  const inp=([n,l,t,o])=>`<label>${l}</label>`+(t==="area"?`<textarea name="${n}" rows="3">${esc(r[n])}</textarea>`:t==="segsel"?`<select name="${n}"><option value="">—</option>${S.sg.filter(s=>!r.epId||s.epId===r.epId).map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.title)}</option>`).join("")}</select>`:t==="epsel"?`<select name="${n}"><option value="">—</option>${S.ep.map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.title)}</option>`).join("")}</select>`:t==="mem"?`<select name="${n}"><option value="">—</option>${S.mem.map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.name)}</option>`).join("")}</select>`:t==="sel"?`<select name="${n}">${o.map(x=>`<option ${r[n]===x?"selected":""}>${x}</option>`).join("")}</select>`:`<input name="${n}" type="${t}" value="${esc(r[n])}">`);
