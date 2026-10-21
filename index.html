@@ -264,7 +264,49 @@ S.tab="ep";S.cur=ep.id;S.et="ov";render()}catch(e){toast("تعذر التحوي�
 const _render=render;
 render=function(keep){if(S.tab==="id"){if(can("id")){nav();$("app").innerHTML=ideasView();bindIdeas();if(keep){const q=$("q");q.focus();q.setSelectionRange(q.value.length,q.value.length)}return}S.tab="home"}_render(keep)};
 /* ===== نهاية صندوق الأفكار ===== */
-(async()=>{
+/* ===== صلاحيات مخصصة كاملة ===== */
+const SEC=[["home","لوحة التحكم"],["my","مهامي"],["qa","الأسئلة والأجوبة"],["ep","الحلقات والفقرات والتصوير"],["tk","كل المهام"],["gs","الضيوف"],["id","صندوق الأفكار"]];
+const ACT=[["v","عرض"],["c","إضافة"],["e","تعديل"],["d","حذف"]];
+ROLES.off=["معطّل",""];
+const KEY2SEC={ep:"ep",sh:"ep",sg:"ep",tk:"tk",gs:"gs",qa:"qa",id:"id"};
+const baseP=r=>{const t=(ROLES[r]?ROLES[r][1]:"").split(" ");return Object.fromEntries(SEC.map(([s])=>[s,{v:t.includes(s),c:t.includes(s)&&s!=="home"&&s!=="my",e:t.includes(s)&&s!=="home"&&s!=="my",d:false}]))};
+const BASE={};Object.keys(ROLES).forEach(r=>{if(r!=="admin"&&r!=="off")BASE[r]=baseP(r)});
+const MX=()=>(S.rl.find(r=>r.id==="_matrix")||{}).m||{};
+const effP=uid=>{const rl=S.rl.find(r=>r.id===uid)||{},role=rl.role&&BASE[rl.role]?rl.role:"member",b=MX()[role]||BASE[role];return rl.ov?{...b,...rl.ov}:b};
+const perm=(s,a)=>S.canDel||!!((effP(S.me)[s]||{})[a]);
+const tabsOf=p=>SEC.filter(([s])=>p[s]&&p[s].v).map(x=>x[0]).join(" ");
+function applyPerms(){const mx=MX();
+ Object.keys(BASE).forEach(r=>{ROLES[r][1]=tabsOf(mx[r]||BASE[r])});
+ S.rl.forEach(r=>{if(r.id==="_matrix")return;if(r.off){S.roles[r.id]="off";return}
+  if(r.ov){const k="u:"+r.id,p={...(mx[r.role]||BASE[r.role]||BASE.member),...r.ov};ROLES[k]=[(ROLES[r.role]?ROLES[r.role][0]:"عضو")+" (مخصص)",tabsOf(p)];S.roles[r.id]=k}})}
+const _of=openForm;
+openForm=function(k,rec,pre){const s=KEY2SEC[k]||k,own=k==="tk"&&rec&&rec.assigneeId===S.me;
+ if(rec&&!own&&!perm(s,"e")){toast("لا تملك صلاحية التعديل");return}
+ if(!rec&&!perm(s,"c")){toast("لا تملك صلاحية الإضافة");return}
+ _of(k,rec,pre);
+ if(rec&&!S.canDel&&perm(s,"d")&&!$("dl")){const b=document.createElement("button");b.type="button";b.className="dng";b.textContent="حذف";b.onclick=async()=>{if(confirm("تأكيد الحذف النهائي؟")){try{await S.db.doc(FORMS[k].col+"/"+rec.id).delete();$("dlg").close();toast("تم الحذف")}catch(e){toast("الحذف يتطلب صلاحية خادم")}}};$("fm").querySelector(".bar").append(b)}};
+S.pr="manager";
+const grid=(p,att)=>`<div class="wrap"><table><tr><th>القسم</th>${ACT.map(a=>`<th>${a[1]}</th>`).join("")}</tr>${SEC.map(([s,n])=>`<tr><td>${n}</td>${ACT.map(([a])=>`<td><input type="checkbox" ${(p[s]||{})[a]?"checked":""} ${att} data-s="${s}" data-a="${a}"></td>`).join("")}</tr>`).join("")}</table></div>`;
+function permView(){const roles=Object.keys(BASE),cur=MX()[S.pr]||BASE[S.pr];
+return `<div class="card"><b>1) صلاحيات كل دور</b><div class="bar">${roles.map(r=>`<button class="${S.pr===r?"on":""}" data-pr="${r}">${ROLES[r][0]}</button>`).join("")}</div>${grid(cur,'data-g="role"')}<div class="bar"><button data-reset="1">إرجاع هذا الدور للافتراضي</button></div></div>
+<div class="card"><b>2) أعضاء الفريق</b><div class="wrap"><table><tr><th>العضو</th><th>الدور</th><th>تخصيص فردي</th><th>معطّل</th></tr>${S.mem.map(m=>{const r=S.rl.find(x=>x.id===m.id)||{};return `<tr><td>${esc(m.name)}</td><td><select data-role="${m.id}">${roles.map(k=>`<option value="${k}" ${(r.role||"member")===k?"selected":""}>${ROLES[k][0]}</option>`).join("")}</select></td><td><button data-ov="${m.id}">${r.ov?"✏️ مخصص":"تخصيص"}</button></td><td><input type="checkbox" data-off="${m.id}" ${r.off?"checked":""}></td></tr>`}).join("")}</table></div><div style="color:var(--mu);font-size:13px">المدير له كل الصلاحيات دائمًا ولا يظهر هنا. «معطّل» يمنعه داخل النظام فقط؛ للمنع الكامل احذف حسابه من لوحة الاستضافة.</div></div>`}
+const saveMx=m=>S.db.doc("roles/_matrix").set({m}).then(()=>toast("تم حفظ الصلاحيات")).catch(()=>toast("للمدير فقط"));
+const saveRl=(id,o)=>{const r={...(S.rl.find(x=>x.id===id)||{})};delete r.id;return S.db.doc("roles/"+id).set({...r,...o}).then(()=>toast("تم الحفظ")).catch(()=>toast("للمدير فقط"))};
+function bindPerm(){
+ document.querySelectorAll("[data-pr]").forEach(b=>b.onclick=()=>{S.pr=b.dataset.pr;render()});
+ document.querySelectorAll('[data-g="role"]').forEach(c=>c.onchange=()=>{const mx={...MX()},p=JSON.parse(JSON.stringify(mx[S.pr]||BASE[S.pr]));p[c.dataset.s][c.dataset.a]=c.checked;mx[S.pr]=p;saveMx(mx)});
+ document.querySelectorAll("[data-reset]").forEach(b=>b.onclick=()=>{const mx={...MX()};delete mx[S.pr];saveMx(mx)});
+ document.querySelectorAll("[data-role]").forEach(s=>s.onchange=()=>saveRl(s.dataset.role,{role:s.value}));
+ document.querySelectorAll("[data-off]").forEach(c=>c.onchange=()=>saveRl(c.dataset.off,{off:c.checked}));
+ document.querySelectorAll("[data-ov]").forEach(b=>b.onclick=()=>ovDlg(b.dataset.ov))}
+function ovDlg(id){const m=S.mem.find(x=>x.id===id),p=JSON.parse(JSON.stringify(effP(id))),d=$("dlg");
+ d.innerHTML=`<form method="dialog" id="fm"><h3>تخصيص صلاحيات ${esc(m.name)}</h3>${grid(p,"")}<div class="bar"><button type="button" class="pri" id="ovs">حفظ</button><button type="button" id="ovr">إلغاء التخصيص</button><button value="x">إغلاق</button></div></form>`;d.showModal();
+ $("ovs").onclick=async()=>{const o={};d.querySelectorAll("[data-s]").forEach(c=>{(o[c.dataset.s]=o[c.dataset.s]||{})[c.dataset.a]=c.checked});await saveRl(id,{ov:o});d.close()};
+ $("ovr").onclick=async()=>{const r={...(S.rl.find(x=>x.id===id)||{})};delete r.id;delete r.ov;await S.db.doc("roles/"+id).set(r);toast("أُلغي التخصيص");d.close()}}
+const _render2=render;
+render=function(keep){applyPerms();if(S.tab==="tm"&&S.canDel){nav();$("app").innerHTML=permView();bindPerm();return}_render2(keep)};
+/* ===== نهاية الصلاحيات المخصصة ===== */
+  (async()=>{
  render();
  try{
   const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
