@@ -306,6 +306,17 @@ function ovDlg(id){const m=S.mem.find(x=>x.id===id),p=JSON.parse(JSON.stringify(
 const _render2=render;
 render=function(keep){applyPerms();if(S.tab==="tm"&&S.canDel){nav();$("app").innerHTML=permView();bindPerm();return}_render2(keep)};
 /* ===== نهاية الصلاحيات المخصصة ===== */
+  /* ===== دور مالك النظام ===== */
+ROLES.admin[0]="مالك النظام";
+BASE.admin=Object.fromEntries(SEC.map(([s])=>[s,{v:true,c:true,e:true,d:true}]));
+const _ap=applyPerms;
+applyPerms=function(){_ap();ROLES.admin[1]=tabsOf(BASE.admin)+" tm"};
+const _render3=render;
+render=function(keep){_render3(keep);
+ if(S.tab==="tm"&&S.canDel){
+  if(S.pr==="admin")document.querySelectorAll('[data-g="role"]').forEach(c=>{c.checked=true;c.disabled=true});
+  $("app").insertAdjacentHTML("afterbegin",'<div class="card">👑 <b>مالك النظام</b>: يملك كل الصلاحيات دائمًا، ولا تتغير من هنا. تعيين عضو بهذا الدور يعطيه كل الأقسام داخل الصفحة فقط، أما صلاحيات الخادم (الحذف وتحديد الأدوار) فتبقى بحساب المدير الفعلي.</div>')}};
+/* ===== نهاية دور مالك النظام ===== */
   (async()=>{
  render();
  try{
