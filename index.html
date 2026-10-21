@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MASAHAM OS — نظام إدارة قناة مع سهم</title>
+<style>
+:root{--bg:#0d0d0d;--card:#181818;--line:#2c2c2c;--tx:#f3efe4;--mu:#9a9482;--gold:#d4af37;--red:#e5594f;--grn:#4caf7a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f6f3ea;--card:#fff;--line:#e2dccb;--tx:#1a1a1a;--mu:#6d675a;--gold:#9a7a12}}
+:root[data-theme="light"]{--bg:#f6f3ea;--card:#fff;--line:#e2dccb;--tx:#1a1a1a;--mu:#6d675a;--gold:#9a7a12}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font-family:"Tajawal","Segoe UI",Tahoma,sans-serif;font-size:15px}
+header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+header b{color:var(--gold);font-size:18px;letter-spacing:1px}header span{color:var(--mu);font-size:12px;flex:1}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 16px}
+nav button{white-space:nowrap}
+button,input,select,textarea{font:inherit;color:var(--tx)}
+button{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer}
+button.on,button.pri{background:var(--gold);color:#111;border-color:var(--gold);font-weight:700}
+button.dng{color:var(--red)}
+main{padding:6px 16px 40px;max-width:1200px;margin:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpi b{display:block;font-size:26px;color:var(--gold)}.kpi.bad b{color:var(--red)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.bar input,.bar select{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:560px}
+th,td{padding:9px;text-align:right;border-bottom:1px solid var(--line)}th{color:var(--mu);font-weight:500;font-size:13px}
+.kan{display:flex;gap:10px;overflow-x:auto;padding-bottom:10px}
+.col{min-width:200px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px}
+.col h4{margin:4px 4px 8px;color:var(--gold);font-size:13px}
+.it{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:6px;cursor:pointer}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--mu)}
+.tag.late{color:var(--red);border-color:var(--red)}
+.pg{height:6px;background:var(--line);border-radius:9px;overflow:hidden}.pg i{display:block;height:100%;background:var(--gold)}
+.empty{text-align:center;color:var(--mu);padding:30px}
+dialog{background:var(--card);color:var(--tx);border:1px solid var(--gold);border-radius:14px;width:min(520px,94vw);padding:16px}
+dialog::backdrop{background:#000a}
+label{display:block;margin:8px 0 3px;color:var(--mu);font-size:13px}
+dialog input,dialog select,dialog textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--gold);color:#111;padding:8px 18px;border-radius:99px;display:none;z-index:9}
+</style>
+</head>
+<body>
+<header><b>MASAHAM OS</b><span>نظام تشغيل وإدارة قناة مع سهم</span><button id="th">◐</button></header>
+<nav id="nav"></nav>
+<main id="app"><div class="empty">جاري التحميل…</div></main>
+<div class="toast" id="toast"></div>
+<dialog id="dlg"></dialog>
+<div id="login" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:50;align-items:center;justify-content:center;padding:16px"><div class="card" style="width:min(380px,100%);padding:20px"><h2 style="color:var(--gold);margin:0 0 4px">MASAHAM OS</h2><div style="color:var(--mu);margin-bottom:12px">تسجيل الدخول إلى نظام قناة مع سهم</div><label>البريد الإلكتروني</label><input id="lem" type="email" autocomplete="username" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px"><label>كلمة المرور</label><input id="lpw" type="password" autocomplete="current-password" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px" onkeydown="if(event.key==='Enter')doLogin()"><div id="lmsg" style="color:var(--red);min-height:20px;margin-top:8px"></div><button class="pri" style="width:100%" onclick="doLogin()">دخول</button><div style="color:var(--mu);font-size:12px;margin-top:10px">الحسابات يضيفها مدير النظام فقط. نسيت كلمة المرور؟ اطلبها من المدير.</div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({apiKey:"PUT_API_KEY",authDomain:"PUT_PROJECT_ID.firebaseapp.com",projectId:"PUT_PROJECT_ID",appId:"PUT_APP_ID"});
+const auth=firebase.auth(),fs=firebase.firestore();let SES=null,ADMIN=false,GO=false;
+const READY=new Promise(r=>{window.__r=r});
+auth.onAuthStateChanged(async u=>{if(!u){document.getElementById("login").style.display="flex";return}if(GO)return;GO=true;SES=u;try{ADMIN=(await fs.doc("admins/"+u.uid).get()).exists}catch(e){}document.getElementById("login").style.display="none";document.querySelector("header").insertAdjacentHTML("beforeend",'<button onclick="doLogout()">خروج</button>');window.__r()});
+function doLogin(){const m=document.getElementById("lmsg");m.textContent="";auth.signInWithEmailAndPassword(document.getElementById("lem").value.trim(),document.getElementById("lpw").value).catch(()=>{m.textContent="البريد أو كلمة المرور غير صحيحة"})}
+function doLogout(){auth.signOut().then(()=>location.reload())}
+window.claude={use:async n=>{await READY;if(n==="db")return fs;if(n==="user")return{id:async()=>SES.uid,profiles:async ids=>Object.fromEntries(ids.map(i=>[i,{name:SES.displayName||SES.email.split("@")[0]}])),canEdit:()=>ADMIN,isOwner:()=>ADMIN,can:()=>null};return null}};
+</script>
+<script>
+const EP=["فكرة جديدة","قيد التقييم","بانتظار الاعتماد","معتمدة","قيد الإعداد","جاهزة للتصوير","تم التصوير","قيد المونتاج","مراجعة أولى","تعديلات مطلوبة","مراجعة نهائية","معتمدة للنشر","مجدولة","منشورة","مؤرشفة","ملغاة"];
+const TK=["جديدة","مسندة","قيد التنفيذ","بانتظار طرف آخر","تحتاج مراجعة","تحتاج تعديلات","مكتملة","ملغاة"];
+const GS=["مرشح","قيد البحث","لم يتم التواصل","تم التواصل","بانتظار الرد","مهتم","تمت الموافقة","اعتذر","مؤكد","تم التسجيل","مؤجل"];
+const PR=["عاجلة","عالية","متوسطة","منخفضة"];
+const S={tab:"home",ep:[],tk:[],gs:[],qa:[],mem:[],rl:[],roles:{},me:"",cur:"",et:"ov",sh:[],sg:[],vs:"",q:"",f:"",db:null,user:null,canDel:false,canWrite:true};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const today=()=>new Date().toISOString().slice(0,10);
+const done=t=>t.status==="مكتملة"||t.status==="ملغاة";
+const late=t=>t.due&&t.due<today()&&!done(t);
+const prog=e=>{const i=EP.indexOf(e.status);return e.status==="ملغاة"?0:Math.round(Math.min(i,13)/13*100)};
+function toast(m){const t=$("toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",2200)}
+const th=localStorage;
+try{const v=th.getItem("mth");if(v)document.documentElement.dataset.theme=v}catch(e){}
+$("th").onclick=()=>{const d=document.documentElement;const n=(d.dataset.theme==="light"||(!d.dataset.theme&&matchMedia("(prefers-color-scheme: light)").matches))?"dark":"light";d.dataset.theme=n;try{th.setItem("mth",n)}catch(e){}};
+
+const ALL=[["home","لوحة التحكم"],["my","مهامي"],["qa","الأسئلة والأجوبة"],["ref","المرجع و VAR"],["ep","الحلقات"],["tk","كل المهام"],["gs","الضيوف"],["tm","الفريق والصلاحيات"]];
+const QS=["مفتوح","تمت الإجابة","معتمد"];
+const ROLES={admin:["مدير النظام","home my qa ep tk gs tm"],manager:["مدير القناة","home my qa ep tk gs"],producer:["منتج","home my qa ep tk gs"],researcher:["باحث","home my qa ep tk"],guestco:["منسق ضيوف","home my qa gs tk"],crew:["مصور / مونتير","home my qa ep tk"],member:["عضو فريق","home my qa"]};
+const role=()=>S.canDel?"admin":(S.roles[S.me]&&ROLES[S.roles[S.me]]?S.roles[S.me]:"member");
+const can=t=>t==="ref"||ROLES[role()][1].split(" ").includes(t);
+const nm=id=>(S.mem.find(m=>m.id===id)||{}).name||"";
+function nav(){$("nav").innerHTML=ALL.filter(([k])=>can(k)).map(([k,v])=>`<button class="${S.tab===k?"on":""}" data-k="${k}">${v}</button>`).join("");
+ $("nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.tab=b.dataset.k;S.q="";S.f="";S.cur="";render()})}
+
+const FORMS={
+ ep:{col:"episodes",title:"حلقة",st:EP,f:[["title","عنوان الحلقة","text"],["topic","الموضوع الرئيسي","text"],["host","المقدم","text"],["guest","الضيف","text"],["researcher","الباحث","text"],["shoot","تاريخ التصوير","date"],["publish","تاريخ النشر المستهدف","date"],["pub_url","رابط النشر","text"],["notes","ملاحظات","area"]]},
+ tk:{col:"tasks",title:"مهمة",st:TK,f:[["title","اسم المهمة","text"],["assigneeId","المسؤول","mem"],["epId","الحلقة المرتبطة","epsel"],["due","تاريخ الاستحقاق","date"],["prio","الأولوية","sel",PR],["notes","الوصف","area"]]},
+ gs:{col:"guests",title:"ضيف",st:GS,f:[["name","الاسم","text"],["job","المسمى والجهة","text"],["field","التخصص","text"],["phone","رقم التواصل","text"],["email","البريد","text"],["owner","مسؤول التواصل","text"],["epId","الحلقة","epsel"],["follow","موعد المتابعة","date"],["notes","ملاحظات داخلية","area"]]},
+ qa:{col:"qa",title:"سؤال",st:QS,f:[["q","السؤال","area"],["a","الإجابة","area"],["to","موجّه إلى","mem"],["tag","الوسم / الموضوع","text"],["epId","الحلقة المرتبطة","epsel"],["segId","الفقرة","segsel"],["bank","بنك الإجابات (إجابة بكل سطر، والمصدر بعد علامة |)","area"],["src","المصدر","text"],["verdict","الحكم (VAR)","sel",["غير مؤكد","صح","غلط"]]]},
+ sh:{col:"shoots",title:"جلسة تصوير",st:["مجدولة","تمت","مؤجلة"],f:[["date","التاريخ","date"],["time","الوقت","text"],["loc","الموقع","text"],["epId","الحلقة","epsel"],["crew","الفريق والمشاركون","text"],["gear","المعدات (سطر لكل عنصر)","area"],["run","ترتيب الفقرات (سطر لكل فقرة)","area"],["notes","ملاحظات المخرج","area"]]},
+ sg:{col:"segs",title:"فقرة",st:["قيد الإعداد","جاهزة","تم تصويرها"],f:[["title","عنوان الفقرة","text"],["epId","الحلقة","epsel"],["ord","الترتيب (رقم)","text"],["dur","المدة بالدقائق","text"],["notes","ملاحظات الفقرة","area"]]}
+};
+function openForm(k,rec,pre){
+ const F=FORMS[k],r=rec||pre||{};
+ const inp=([n,l,t,o])=>`<label>${l}</label>`+(t==="area"?`<textarea name="${n}" rows="3">${esc(r[n])}</textarea>`:t==="segsel"?`<select name="${n}"><option value="">—</option>${S.sg.filter(s=>!r.epId||s.epId===r.epId).map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.title)}</option>`).join("")}</select>`:t==="epsel"?`<select name="${n}"><option value="">—</option>${S.ep.map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.title)}</option>`).join("")}</select>`:t==="mem"?`<select name="${n}"><option value="">—</option>${S.mem.map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.name)}</option>`).join("")}</select>`:t==="sel"?`<select name="${n}">${o.map(x=>`<option ${r[n]===x?"selected":""}>${x}</option>`).join("")}</select>`:`<input name="${n}" type="${t}" value="${esc(r[n])}">`);
+ const log=k==="gs"&&rec?`<label>سجل التواصل</label>${(r.log||[]).map(x=>`<div class="card">${esc(x.d)} — ${esc(x.t)}</div>`).join("")||'<div class="tag">لا يوجد</div>'}<input id="nl" placeholder="أضف محاولة تواصل (الطريقة والنتيجة)">`:"";
+ $("dlg").innerHTML=`<form method="dialog" id="fm"><h3>${rec?"تعديل":"إضافة"} ${F.title}</h3>${F.f.map(inp).join("")}<label>الحالة</label><select name="status">${F.st.map(x=>`<option ${(r.status||F.st[0])===x?"selected":""}>${x}</option>`).join("")}</select>${log}<div class="bar" style="margin-top:14px"><button class="pri" value="ok">حفظ</button><button value="x">إلغاء</button>${rec&&S.canDel?`<button type="button" class="dng" id="dl">حذف</button>`:""}</div></form>`;
+ const d=$("dlg");d.showModal();
+ if(k==="qa"&&rec){const b=document.createElement("button");b.type="button";b.textContent="حوّل لمهمة";b.onclick=async()=>{await S.db.collection("tasks").doc().set({title:rec.q.slice(0,80),assigneeId:rec.to||"",assignee:nm(rec.to),status:"جديدة",notes:"من سؤال: "+rec.q,prio:"متوسطة",created:Date.now(),updated:Date.now(),by:S.me});d.close();toast("تم إنشاء المهمة")};$("fm").querySelector(".bar").append(b)}
+ $("fm").onsubmit=async e=>{
+  if(e.submitter?.value!=="ok")return;
+  const fd=Object.fromEntries(new FormData($("fm")));const main=F.f[0][0];
+  if(!fd[main].trim()){e.preventDefault();toast("الحقل الأول مطلوب");return}
+  if(k==="qa"&&!rec&&S.qa.some(x=>sim(x.q,fd.q)>=0.8)&&!confirm("يوجد سؤال مشابه جدًا محفوظ من قبل. تضيفه مع ذلك؟")){e.preventDefault();return}
+  if(k==="ep"&&fd.status==="منشورة"&&(!fd.pub_url||!fd.publish)&&!S.canDel){e.preventDefault();toast("أدخل رابط وتاريخ النشر أولًا");return}
+  const log=r.log||[];if($("nl")&&$("nl").value.trim())log.push({d:today(),t:$("nl").value.trim()});
+  const data={...r,...fd,log,updated:Date.now()};if(!rec){data.created=Date.now();data.by=S.me}if(k==="tk")data.assignee=nm(fd.assigneeId);
+  try{const ref=rec?S.db.doc(F.col+"/"+rec.id):S.db.collection(F.col).doc();const o={...data};delete o.id;await ref.set(o);toast("تم الحفظ")}catch(x){toast("تعذر الحفظ: ليس لديك صلاحية الكتابة")}
+ };
+ if($("dl"))$("dl").onclick=async()=>{if(confirm("تأكيد الحذف النهائي؟")){await S.db.doc(F.col+"/"+rec.id).delete();d.close();toast("تم الحذف")}};
+}
+
+function bar(k,ss){return `<div class="bar"><input id="q" placeholder="بحث…" value="${esc(S.q)}"><select id="f"><option value="">كل الحالات</option>${ss.map(x=>`<option ${S.f===x?"selected":""}>${x}</option>`).join("")}</select>${S.canWrite?`<button class="pri" id="add">+ إضافة</button>`:""}</div>`}
+function bind(k){const q=$("q");q.oninput=()=>{S.q=q.value;render(true)};$("f").onchange=e=>{S.f=e.target.value;render()};if($("add"))$("add").onclick=()=>openForm(k);document.querySelectorAll("[data-id]").forEach(el=>el.onclick=()=>k==="ep"?(S.cur=el.dataset.id,S.et="ov",render()):openForm(k,S[k].find(x=>x.id===el.dataset.id)))}
+const flt=(a,keys)=>a.filter(x=>(!S.f||x.status===S.f)&&(!S.q||keys.some(c=>norm(x[c]).includes(norm(S.q)))));
+
+function home(){
+ const t=S.tk,e=S.ep,open=t.filter(x=>!done(x)),w=Date.now()-7*864e5;
+ const cnt=l=>e.filter(x=>l.includes(x.status)).length;
+ const kp=[["حلقات قيد الإعداد",cnt(["قيد الإعداد","جاهزة للتصوير","معتمدة"])],["قيد الإنتاج",cnt(["تم التصوير","قيد المونتاج","مراجعة أولى","تعديلات مطلوبة","مراجعة نهائية"])],["جاهزة للنشر",cnt(["معتمدة للنشر","مجدولة"])],["مهام مفتوحة",open.length],["مهام متأخرة",t.filter(late).length,1],["مستحقة اليوم",open.filter(x=>x.due===today()).length],["أُنجزت هذا الأسبوع",t.filter(x=>x.status==="مكتملة"&&x.updated>w).length],["ضيوف بانتظار الرد",S.gs.filter(g=>["بانتظار الرد","تم التواصل"].includes(g.status)).length],["أسئلة بلا إجابة",S.qa.filter(q=>q.status==="مفتوح").length]];
+ const by={};open.forEach(x=>{const n=x.assignee||"غير مسند";by[n]=(by[n]||0)+1});
+ const fol=S.gs.filter(g=>g.follow&&g.follow<=today()&&!["تم التسجيل","اعتذر"].includes(g.status));
+ const up=S.sh.filter(x=>x.date>=today()&&x.status!=="تمت").sort((a,b)=>a.date>b.date?1:-1).slice(0,5).map(x=>({shoot:x.date+" "+(x.time||""),title:(S.ep.find(p=>p.id===x.epId)||{}).title||x.loc||""}));
+ const avg=e.length?Math.round(e.reduce((s,x)=>s+prog(x),0)/e.length):0;
+ return `<div class="grid">${kp.map(([l,v,b])=>`<div class="kpi ${b&&v?"bad":""}">${l}<b>${v}</b></div>`).join("")}</div>
+ <div class="card">نسبة إنجاز خطة الإنتاج: ${avg}%<div class="pg"><i style="width:${avg}%"></i></div></div>
+ <div class="card"><b>توزيع المهام المفتوحة</b><br>${Object.entries(by).map(([n,v])=>`<span class="tag">${esc(n)}: ${v}</span> `).join("")||"لا توجد مهام مفتوحة"}</div>
+ <div class="card"><b>تصوير قادم</b>${up.map(x=>`<div>${esc(x.shoot)} — ${esc(x.title)}</div>`).join("")||'<div class="tag">لا يوجد</div>'}</div>
+ <div class="card"><b>متابعات ضيوف مستحقة</b>${fol.map(g=>`<div class="tag late">${esc(g.name)} — ${esc(g.follow)}</div>`).join(" ")||'<div class="tag">لا يوجد</div>'}</div>
+ ${!e.length&&!t.length?'<div class="empty">ابدأ بإضافة أول حلقة من تبويب «الحلقات»، وستظهر الأرقام هنا تلقائيًا.</div>':""}`}
+
+function eps(){if(S.cur)return epPage();
+ const l=flt(S.ep,["title","topic","guest","host"]);
+ const kan=`<div class="kan">${EP.filter(s=>l.some(x=>x.status===s)||["فكرة جديدة","قيد الإعداد","قيد المونتاج","منشورة"].includes(s)).map(s=>`<div class="col"><h4>${s}</h4>${l.filter(x=>x.status===s).map(x=>`<div class="it" data-id="${x.id}">${esc(x.title)}<div class="pg"><i style="width:${prog(x)}%"></i></div></div>`).join("")}</div>`).join("")}</div>`;
+ return bar("ep",EP)+(S.ep.length?kan:'<div class="empty">لا توجد حلقات بعد. اضغط «+ إضافة».</div>')}
+
+function tks(){
+ const l=flt(S.tk,["title","assignee","episode"]).sort((a,b)=>(a.due||"9")>(b.due||"9")?1:-1);
+ return bar("tk",TK)+(l.length?`<div class="wrap"><table><tr><th>المهمة</th><th>المسؤول</th><th>الحلقة</th><th>الاستحقاق</th><th>الحالة</th></tr>${l.map(x=>`<tr data-id="${x.id}" style="cursor:pointer"><td>${esc(x.title)}</td><td>${esc(x.assignee)}</td><td>${esc(x.episode)}</td><td>${esc(x.due)} ${late(x)?'<span class="tag late">متأخرة</span>':""}</td><td><span class="tag">${x.status}</span></td></tr>`).join("")}</table></div>`:'<div class="empty">لا توجد مهام مطابقة.</div>')}
+
+function gss(){
+ const l=flt(S.gs,["name","job","field","owner"]);
+ return bar("gs",GS)+(l.length?`<div class="wrap"><table><tr><th>الضيف</th><th>الجهة</th><th>المتابعة</th><th>الحالة</th></tr>${l.map(x=>`<tr data-id="${x.id}" style="cursor:pointer"><td>${esc(x.name)}</td><td>${esc(x.job)}</td><td>${esc(x.follow)}</td><td><span class="tag">${x.status}</span></td></tr>`).join("")}</table></div>`:'<div class="empty">لا يوجد ضيوف مطابقون.</div>')}
+
+const norm=s=>String(s||"").replace(/[\u064B-\u0652\u0640]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").toLowerCase();
+const hits=t=>{const w=norm(t).split(/\s+/).filter(Boolean);if(!w.length)return[];return S.qa.map(x=>{const h=norm(x.q+" "+x.a+" "+x.tag+" "+(x.bank||""));return{x,s:w.filter(k=>h.includes(k)).length/w.length}}).filter(r=>r.s>=0.5).sort((a,b)=>b.s-a.s).slice(0,30)};
+const VD={"صح":["✅ صح","var(--grn)"],"غلط":["❌ غلط","var(--red)"],"غير مؤكد":["⚠️ غير مؤكد","var(--gold)"]};
+function refOld(){const v=S.m!=="prep";return `<div class="bar"><button class="${v?"on":""}" data-m2="var">🎬 VAR وقت التصوير</button><button class="${v?"":"on"}" data-m2="prep">📝 فحص التكرار وقت الإعداد</button></div><div class="card">${v?"اكتب الادعاء أو المعلومة اللي قالها الضيف، ونشوف هل عندنا إجابة موثقة عنها.":"اكتب السؤال اللي تبي تضيفه، ونشوف هل جبناه من قبل."}<input id="rq" style="width:100%;margin-top:8px;padding:12px;font-size:18px;background:var(--bg);border:1px solid var(--gold);border-radius:10px" placeholder="${v?"ابحث في الإجابات…":"اكتب السؤال…"}"></div><div id="rs"></div>`}
+function bindOld(){const i=$("rq"),o=$("rs"),v=S.m!=="prep";document.querySelectorAll("[data-m2]").forEach(b=>b.onclick=()=>{S.m=b.dataset.m2;render()});i.oninput=()=>{const h=hits(i.value);if(!i.value.trim()){o.innerHTML="";return}let t="";if(v)t=h.length?"":'<div class="card" style="border-color:var(--gold)">⚠️ ما لقينا شي في المرجع. لا نجزم قبل ما نتحقق من مصدر.</div>';else t=h.length&&h[0].s>=0.8?'<div class="card" style="border-color:var(--red)">⚠️ يشبه سؤال سابق، راجع النتائج قبل ما تكرره.</div>':'<div class="card" style="border-color:var(--grn)">✅ ما لقينا سؤال مطابق، السؤال جديد. <button class="pri" onclick="openForm(\'qa\')">+ أضفه</button></div>';o.innerHTML=t+h.map(({x,s})=>{const d=VD[x.verdict]||VD["غير مؤكد"];return `<div class="card" data-id="${x.id}" style="cursor:pointer;border-right:5px solid ${d[1]}"><div style="font-size:${v?22:15}px;color:${d[1]};font-weight:700">${d[0]}</div><b>${esc(x.q)}</b><div>${x.a?esc(x.a):'<span class="tag late">بدون إجابة</span>'}</div>${x.src?`<span class="tag">المصدر: ${esc(x.src)}</span>`:'<span class="tag late">بدون مصدر</span>'} <span class="tag">تطابق ${Math.round(s*100)}%</span></div>`}).join("");o.querySelectorAll("[data-id]").forEach(el=>el.onclick=()=>openForm("qa",S.qa.find(x=>x.id===el.dataset.id)))};i.focus()}
+const nz=s=>norm(s).replace(/[٠-٩]/g,d=>d.charCodeAt(0)-1632);
+const tok=s=>nz(s).split(/[^\p{L}\p{N}]+/u).filter(x=>x.length>1);
+const bank=q=>(q.bank||"").split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const p=l.split("|");return{t:p[0].trim(),src:p.slice(1).join("|").trim()}});
+const cmp=(g,b)=>{const G=new Set(tok(g)),B=tok(b);const s=B.length?B.filter(w=>G.has(w)).length/B.length:0;const nb=nz(b).match(/\d+/g)||[],ng=nz(g).match(/\d+/g)||[];return{s,n:nb.every(x=>ng.includes(x))}};
+const IS="width:100%;margin-top:8px;padding:12px;font-size:18px;background:var(--bg);border:1px solid var(--gold);border-radius:10px";
+function tgl(v){return `<div class="bar"><button class="${v?"on":""}" data-m2="var">🎬 VAR وقت التصوير</button><button class="${v?"":"on"}" data-m2="prep">📝 فحص التكرار وقت الإعداد</button></div>`}
+function refV(){const q=S.qa.find(x=>x.id===S.sel);return (S.scoped?"":tgl(1))+(q?`<div class="card"><b>${esc(q.q)}</b><br><span class="tag">${bank(q).length} إجابة في البنك</span> <button id="chg">تغيير السؤال</button><input id="gq" style="${IS}" placeholder="وش قال الضيف؟ اكتب كلامه…"></div><div id="rs"></div>`:`${S.scoped?segChips():""}<div class="card">ابحث عن السؤال أو الإجابة (حتى بحرف واحد):<input id="rq" style="${IS}" placeholder="ابحث عن السؤال…"></div><div id="rs"></div>`)}
+function ref(){S.scoped=false;return S.m==="prep"?refOld():refV()}
+function bindRef(){if(S.m==="prep")return bindOld();bindV()}
+function bindV(){document.querySelectorAll("[data-vs]").forEach(b=>b.onclick=()=>{S.vs=b.dataset.vs;render()});document.querySelectorAll("[data-m2]").forEach(b=>b.onclick=()=>{S.m=b.dataset.m2;render()});const o=$("rs"),q=S.qa.find(x=>x.id===S.sel);
+if(!q){const i=$("rq");const show=()=>{const l=(i.value.trim()?hits(i.value).map(r=>r.x):S.qa).filter(x=>!S.scoped||(x.epId===S.cur&&(!S.vs||x.segId===S.vs))).slice(0,30);o.innerHTML=l.map(x=>`<div class="card" data-q="${x.id}" style="cursor:pointer"><b>${esc(x.q)}</b> <span class="tag">${bank(x).length} إجابة</span>${x.segId?` <span class="tag">${esc((S.sg.find(s=>s.id===x.segId)||{}).title||"")}</span>`:""}${i.value.trim()?bank(x).filter(b=>norm(b.t).includes(norm(i.value.trim()))).slice(0,2).map(b=>`<div style="color:var(--mu);font-size:13px">• ${esc(b.t)}</div>`).join(""):""}</div>`).join("")||'<div class="empty">لا توجد أسئلة. أضف من تبويب الأسئلة.</div>';o.querySelectorAll("[data-q]").forEach(el=>el.onclick=()=>{S.sel=el.dataset.q;render()})};i.oninput=show;show();i.focus();return}
+$("chg").onclick=()=>{S.sel="";render()};const g=$("gq"),B=bank(q);
+g.oninput=()=>{if(!g.value.trim()){o.innerHTML="";return}if(!B.length){o.innerHTML='<div class="card" style="border-color:var(--gold)">⚠️ ما فيه إجابات في البنك لهذا السؤال.</div>';return}
+const r=B.map(b=>({b,...cmp(g.value,b.t)})).sort((a,b)=>b.s-a.s),t=r[0];
+const m=t.s>=0.6&&t.n?["✅ مطابق لإجابة في البنك","var(--grn)"]:t.s>=0.6?["⚠️ الكلام يطابق لكن الأرقام تختلف عن الإجابة المعتمدة","var(--gold)"]:t.s>=0.3?["⚠️ قريب لكن مو مطابق","var(--gold)"]:["❌ ما يطابق أي إجابة في البنك","var(--red)"];
+o.innerHTML=`<div class="card" style="border-right:6px solid ${m[1]};font-size:22px;color:${m[1]};font-weight:700">${m[0]}</div>`+r.map(x=>`<div class="card"><div>${esc(x.b.t)}</div>${x.b.src?`<span class="tag">المصدر: ${esc(x.b.src)}</span> `:""}<span class="tag">تطابق ${Math.round(x.s*100)}%</span></div>`).join("")};g.focus()}
+const sim=(a,b)=>{const A=new Set(tok(a)),B=tok(b);return B.length?B.filter(w=>A.has(w)).length/Math.max(A.size,B.length):0};
+function parseImp(t){const out=[];let seg="",cur=null;t.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).forEach(l=>{let m=l.match(/^(?:الفقرة|فقرة)\s*[:：\-]?\s*(.+)$/);if(m){seg=m[1].trim();cur=null;return}
+m=l.match(/^(?:ج|الإجابة|الاجابة|إجابة|اجابة)\s*[:：]\s*(.+)$/);if(m){if(cur){const p=m[1].split("|");cur.ans.push({t:p[0].trim(),src:p.slice(1).join("|").trim()})}return}
+const q=l.replace(/^[\d٠-٩]+\s*[.)\-–]\s*|^[•\-–*]\s*/,"").replace(/^(?:س|السؤال|سؤال)\s*[:：]\s*/,"").trim();if(q){cur={seg,q,ans:[]};out.push(cur)}});return out}
+async function readFile(f){if(f.name.toLowerCase().endsWith(".docx")){if(!window.mammoth)throw new Error("مكتبة Word لم تُحمّل");return (await mammoth.extractRawText({arrayBuffer:await f.arrayBuffer()})).value}return await f.text()}
+async function runImp(mode,ep,items){let nq=0,na=0,sk=0;const sg=S.sg.filter(s=>s.epId===ep),sid={},ex=S.qa.filter(x=>x.epId===ep).map(x=>({...x}));sg.forEach(s=>sid[norm(s.title)]=s.id);let ord=sg.length;
+for(const it of items){const m=ex.find(x=>sim(x.q,it.q)>=0.8);if(!m&&mode==="a"){sk++;continue}
+let segId=m?m.segId||"":"";if(!m&&it.seg){const k=norm(it.seg);if(!sid[k]){const r=S.db.collection("segs").doc();await r.set({title:it.seg,epId:ep,ord:String(++ord),status:"قيد الإعداد",created:Date.now(),updated:Date.now(),by:S.me});sid[k]=r.id}segId=sid[k]}
+const have=m?bank(m).map(b=>norm(b.t)):[];const lines=it.ans.filter(a=>!have.includes(norm(a.t))).map(a=>a.t+(a.src?" | "+a.src:""));
+if(m){if(lines.length){m.bank=(m.bank?m.bank+"\n":"")+lines.join("\n");await S.db.doc("qa/"+m.id).update({bank:m.bank,updated:Date.now()});na+=lines.length}}
+else{const r=S.db.collection("qa").doc(),o={q:it.q,epId:ep,segId,bank:lines.join("\n"),status:"مفتوح",verdict:"غير مؤكد",created:Date.now(),updated:Date.now(),by:S.me};await r.set(o);ex.push({...o,id:r.id});nq++;na+=lines.length}}
+return[nq,na,sk]}
+function impDlg(mode,ep0){const d=$("dlg");let items=[];d.innerHTML=`<form method="dialog" id="fm"><h3>${mode==="q"?"استيراد أسئلة":"استيراد إجابات"} من ملف</h3><label>الحلقة</label><select id="ie">${S.ep.map(x=>`<option value="${x.id}" ${x.id===ep0?"selected":""}>${esc(x.title)}</option>`).join("")}</select><label>ملف Word (.docx) أو نص (.txt)</label><input type="file" id="if" accept=".docx,.txt,.md,.csv"><label>أو الصق النص هنا</label><textarea id="it" rows="6" placeholder="فقرة: المقدمة&#10;س: متى تأسس النادي؟&#10;ج: 1927 | موقع النادي"></textarea><div id="ip" class="card" style="display:none"></div><div class="bar"><button type="button" class="pri" id="ig">استيراد</button><button value="x">إغلاق</button></div></form>`;d.showModal();
+const ip=$("ip"),ie=$("ie"),it=$("it");
+const prev=()=>{items=parseImp(it.value);const ex=S.qa.filter(x=>x.epId===ie.value);let nw=0,mg=0,sk=0,na=0;items.forEach(i=>{if(ex.find(x=>sim(x.q,i.q)>=0.8))mg++;else if(mode==="q")nw++;else sk++;na+=i.ans.length});ip.style.display="block";ip.innerHTML=items.length?`${items.length} سؤال في الملف: ${nw} جديد، ${mg} موجود مسبقًا (تُضاف إجاباته الجديدة فقط)${sk?`، ${sk} غير موجود وسيُتخطّى`:""} — ${na} إجابة`:"ما لقيت أسئلة. استخدم: «فقرة: …» و«س: …» و«ج: … | المصدر»."};
+$("if").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{it.value=await readFile(f);prev()}catch(x){toast("تعذر قراءة الملف: "+x.message)}};it.oninput=prev;ie.onchange=prev;
+$("ig").onclick=async()=>{if(!items.length||!ie.value){toast("اختر الحلقة وملفًا فيه أسئلة");return}$("ig").disabled=true;try{const[a,b,c]=await runImp(mode,ie.value,items);d.close();toast(`تم: ${a} سؤال جديد، ${b} إجابة${c?`، ${c} متخطى`:""}`)}catch(x){toast("تعذر الاستيراد");$("ig").disabled=false}}}
+function studio(id,qs){const sg=S.sg.filter(x=>x.epId===id).sort((a,b)=>(+a.ord||99)-(+b.ord||99)),n=qs.length,k=qs.filter(x=>x.asked).length;
+const row=x=>`<div class="it" data-ask="${x.id}" style="${x.asked?"opacity:.5;text-decoration:line-through":""}"><span style="font-size:18px">${x.asked?"☑":"☐"}</span> <b>${esc(x.q)}</b>${bank(x).slice(0,2).map(a=>`<div style="color:var(--mu);font-size:13px">↳ ${esc(a.t)}</div>`).join("")}</div>`;const o=qs.filter(x=>!sg.some(s=>s.id===x.segId));
+return `<div class="card">طُرح ${k} من ${n} سؤال — اضغط على السؤال لتعلّم عليه<div class="pg"><i style="width:${n?Math.round(k/n*100):0}%"></i></div></div>`+sg.map(s=>`<div class="card"><b>${esc(s.ord||"")}. ${esc(s.title)}</b> ${s.dur?`<span class="tag">${esc(s.dur)} د</span>`:""}${qs.filter(x=>x.segId===s.id).map(row).join("")}</div>`).join("")+(o.length?`<div class="card"><b>بدون فقرة</b>${o.map(row).join("")}</div>`:"")}
+function segChips(){return `<div class="bar"><button class="${!S.vs?"on":""}" data-vs="">كل الفقرات</button>${S.sg.filter(s=>s.epId===S.cur).sort((a,b)=>(+a.ord||99)-(+b.ord||99)).map(s=>`<button class="${S.vs===s.id?"on":""}" data-vs="${s.id}">${esc(s.title)}</button>`).join("")}</div>`}
+function sgView(id,qs){const sg=S.sg.filter(x=>x.epId===id).sort((a,b)=>(+a.ord||99)-(+b.ord||99));
+const qc=x=>`<div class="it" data-k="qa" data-id="${x.id}"><b>${esc(x.q)}</b> <span class="tag">${bank(x).length} إجابة</span>${bank(x).map(a=>`<div style="color:var(--mu);font-size:13px">• ${esc(a.t)}${a.src?" — "+esc(a.src):""}</div>`).join("")}</div>`;
+const one=s=>{const l=qs.filter(x=>x.segId===s.id);return `<details class="card" open><summary style="cursor:pointer"><b>${s.ord?esc(s.ord)+". ":""}${esc(s.title)}</b> <span class="tag">${l.length} سؤال</span> ${s.dur?`<span class="tag">${esc(s.dur)} د</span>`:""} <button data-k="sg" data-id="${s.id}">تعديل</button></summary>${l.map(qc).join("")||'<div class="empty">لا أسئلة في هذه الفقرة</div>'}<div class="bar"><button class="pri" data-addq="${s.id}">+ سؤال لهذه الفقرة</button></div></details>`};
+const o=qs.filter(x=>!sg.some(s=>s.id===x.segId));
+return `<div class="bar"><button class="pri" data-add="sg">+ فقرة جديدة</button><button onclick="impDlg('q','${id}')">📥 استيراد أسئلة</button><button onclick="impDlg('a','${id}')">📥 استيراد إجابات</button></div>`+(sg.map(one).join("")||'<div class="empty">ابدأ بإضافة الفقرات، ثم أضف أسئلة كل فقرة.</div>')+(o.length?`<div class="card"><b>أسئلة بدون فقرة</b>${o.map(qc).join("")}</div>`:"")}
+function epPage(){const e=S.ep.find(x=>x.id===S.cur);if(!e){S.cur="";return eps()}
+const id=e.id,qs=S.qa.filter(x=>x.epId===id),ts=S.tk.filter(x=>x.epId===id),gl=S.gs.filter(x=>x.epId===id),ss=S.sh.filter(x=>x.epId===id).sort((a,b)=>a.date>b.date?1:-1);
+const T=[["ov","نظرة عامة"],["sg","الفقرات والأسئلة ("+S.sg.filter(x=>x.epId===id).length+")"],["sd","📋 ورقة التصوير"],["var","🎬 VAR"],["sh","التصوير ("+ss.length+")"],["gs","الضيوف ("+gl.length+")"],["tk","المهام ("+ts.length+")"]];
+const hd=`<div class="bar"><button id="bk">← الحلقات</button><h3 style="margin:0;flex:1;color:var(--gold)">${esc(e.title)}</h3><span class="tag">${e.status}</span></div><div class="pg"><i style="width:${prog(e)}%"></i></div><nav style="padding:10px 0">${T.map(([k,v])=>`<button class="${S.et===k?"on":""}" data-et="${k}">${v}</button>`).join("")}</nav>`;
+const add=(k,l)=>`<div class="bar"><button class="pri" data-add="${k}">+ ${l}</button></div>`;
+const none='<div class="empty">لا يوجد شيء هنا بعد.</div>';let b="";
+if(S.et==="ov")b=`<div class="grid"><div class="kpi">أسئلة<b>${qs.length}</b></div><div class="kpi">بلا إجابات<b>${qs.filter(x=>!bank(x).length&&!x.a).length}</b></div><div class="kpi">مهام مفتوحة<b>${ts.filter(x=>!done(x)).length}</b></div><div class="kpi ${ts.some(late)?"bad":""}">متأخرة<b>${ts.filter(late).length}</b></div></div><div class="card"><div>الموضوع: ${esc(e.topic)}</div><div>المقدم: ${esc(e.host)} — الباحث: ${esc(e.researcher)}</div><div>النشر المستهدف: ${esc(e.publish)}</div>${e.pub_url?`<div>رابط النشر: ${esc(e.pub_url)}</div>`:""}<div>${esc(e.notes)}</div><div class="bar"><select id="st">${EP.map(s=>`<option ${e.status===s?"selected":""}>${s}</option>`).join("")}</select><button id="ed">تعديل البيانات</button></div></div>`;
+else if(S.et==="sd")b=studio(id,qs);else if(S.et==="sg")b=sgView(id,qs);else if(S.et==="qa")b=add("qa","سؤال")+(qs.map(x=>`<div class="card" data-k="qa" data-id="${x.id}" style="cursor:pointer"><b>${esc(x.q)}</b><div>${x.a?esc(x.a):""}</div><span class="tag">${bank(x).length} إجابة في البنك</span> <span class="tag">${x.status}</span> ${x.to?`<span class="tag">إلى: ${esc(nm(x.to))}</span>`:""}</div>`).join("")||none);
+else if(S.et==="var"){S.scoped=true;b=refV()}
+else if(S.et==="sh")b=add("sh","جلسة تصوير")+(ss.map(x=>`<div class="card" data-k="sh" data-id="${x.id}" style="cursor:pointer"><b>${esc(x.date)} ${esc(x.time)}</b> — ${esc(x.loc)} <span class="tag">${x.status}</span><div>${esc(x.crew)}</div>${x.gear?`<div class="card"><b>المعدات</b>${x.gear.split("\n").filter(Boolean).map(g=>`<div>☐ ${esc(g)}</div>`).join("")}</div>`:""}${x.run?`<div class="card"><b>ترتيب الفقرات</b>${x.run.split("\n").filter(Boolean).map((g,i)=>`<div>${i+1}. ${esc(g)}</div>`).join("")}</div>`:""}${x.notes?`<div>${esc(x.notes)}</div>`:""}</div>`).join("")||none);
+else if(S.et==="gs")b=add("gs","ضيف")+(gl.map(x=>`<div class="card" data-k="gs" data-id="${x.id}" style="cursor:pointer"><b>${esc(x.name)}</b> ${esc(x.job)} <span class="tag">${x.status}</span>${can("gs")?` <span class="tag">${esc(x.phone)}</span>`:""}</div>`).join("")||none);
+else b=add("tk","مهمة")+(ts.map(x=>`<div class="card" data-k="tk" data-id="${x.id}" style="cursor:pointer"><b>${esc(x.title)}</b> <span class="tag">${x.status}</span> ${esc(x.assignee)} ${esc(x.due)} ${late(x)?'<span class="tag late">متأخرة</span>':""}</div>`).join("")||none);
+return hd+b}
+function bindEp(){const e=S.ep.find(x=>x.id===S.cur);$("bk").onclick=()=>{S.cur="";render()};document.querySelectorAll("[data-et]").forEach(b=>b.onclick=()=>{S.et=b.dataset.et;render()});document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>openForm(b.dataset.add,null,{epId:e.id}));document.querySelectorAll("[data-id]").forEach(el=>el.onclick=()=>openForm(el.dataset.k,S[el.dataset.k].find(x=>x.id===el.dataset.id)));
+document.querySelectorAll("[data-ask]").forEach(el=>el.onclick=()=>{const x=S.qa.find(q=>q.id===el.dataset.ask);S.db.doc("qa/"+x.id).update({asked:!x.asked})});document.querySelectorAll("[data-addq]").forEach(b=>b.onclick=()=>openForm("qa",null,{epId:e.id,segId:b.dataset.addq}));if($("ed"))$("ed").onclick=()=>openForm("ep",e);
+if($("st"))$("st").onchange=ev=>{const v=ev.target.value;if(v==="منشورة"&&!e.pub_url&&!S.canDel){toast("أدخل رابط النشر أولًا");render();return}S.db.doc("episodes/"+e.id).update({status:v,updated:Date.now()}).then(()=>toast("تم التحديث")).catch(()=>toast("لا توجد صلاحية"))};
+if(S.et==="var")bindV()}
+const em=t=>`<div class="tag">${t}</div>`;
+function qas(){const l=flt(S.qa,["q","a","tag","bank"]).sort((a,b)=>(b.created||0)-(a.created||0));return bar("qa",QS)+`<div class="bar"><button onclick="impDlg('q','')">📥 استيراد أسئلة</button><button onclick="impDlg('a','')">📥 استيراد إجابات</button></div>`+(l.length?l.map(x=>`<div class="card" data-id="${x.id}" style="cursor:pointer"><b>${esc(x.q)}</b><div>${x.a?esc(x.a):'<span class="tag late">بدون إجابة</span>'}</div><span class="tag">${x.status}</span> <span class="tag">${esc(x.tag)}</span> <span class="tag">من: ${esc(nm(x.by))}</span> ${x.to?`<span class="tag">إلى: ${esc(nm(x.to))}</span>`:""}</div>`).join(""):'<div class="empty">لا توجد أسئلة. اكتب أول سؤال وخلّ الفريق يجاوب.</div>')}
+function my(){const m=S.tk.filter(x=>x.assigneeId===S.me&&!done(x)),q=S.qa.filter(x=>x.to===S.me&&x.status==="مفتوح");return `<div class="card"><b>مهامي (${m.length})</b>${m.map(x=>`<div class="it" data-k="tk" data-id="${x.id}">${esc(x.title)} ${late(x)?'<span class="tag late">متأخرة</span>':""}<br><span class="tag">${x.status}</span> ${esc(x.due)}</div>`).join("")||em("لا توجد مهام مسندة إليك")}</div><div class="card"><b>أسئلة تنتظر إجابتك (${q.length})</b>${q.map(x=>`<div class="it" data-k="qa" data-id="${x.id}">${esc(x.q)}</div>`).join("")||em("لا يوجد")}</div><div class="bar"><button class="pri" onclick="openForm('qa')">+ اسأل سؤال</button></div>`}
+function tm(){return `<div class="wrap"><table><tr><th>العضو</th><th>الدور</th><th>مهام مفتوحة</th></tr>${S.mem.map(m=>`<tr><td>${esc(m.name)}</td><td><select data-m="${m.id}">${Object.entries(ROLES).map(([k,v])=>`<option value="${k}" ${(S.roles[m.id]||"member")===k?"selected":""}>${v[0]}</option>`).join("")}</select></td><td>${S.tk.filter(t=>t.assigneeId===m.id&&!done(t)).length}</td></tr>`).join("")}</table></div><div class="card">كل عضو لازم يفتح الرابط مرة وحدة عشان يظهر هنا، وبعدها تحدد دوره.</div>`}
+function render(keep){if(!can(S.tab))S.tab="home";nav();const v={home,my,ref,qa:qas,ep:eps,tk:tks,gs:gss,tm}[S.tab]();$("app").innerHTML=v;if(["ep","tk","gs","qa"].includes(S.tab)&&!(S.tab==="ep"&&S.cur)){bind(S.tab);if(keep){const q=$("q");q.focus();q.setSelectionRange(q.value.length,q.value.length)}}if(S.tab==="my")document.querySelectorAll("[data-id]").forEach(el=>el.onclick=()=>openForm(el.dataset.k,S[el.dataset.k].find(x=>x.id===el.dataset.id)));if(S.tab==="ep"&&S.cur)bindEp();if(S.tab==="ref")bindRef();if(S.tab==="tm")document.querySelectorAll("[data-m]").forEach(s=>s.onchange=()=>S.db.doc("roles/"+s.dataset.m).set({role:s.value}).then(()=>toast("تم تحديث الدور")).catch(()=>toast("للمدير فقط")))}
+
+function sub(col,key){S.db.collection(col).onSnapshot(s=>{const a=[];(s.docs||[]).forEach(d=>a.push({...(d.data?d.data():d),id:d.id}));S[key]=a;if(key==="rl")S.roles=Object.fromEntries(a.map(r=>[r.id,r.role]));render(document.activeElement&&document.activeElement.id==="q")},e=>{$("app").innerHTML='<div class="empty">تعذر تحميل البيانات: '+esc(e.message)+'</div>'})}
+
+(async()=>{
+ render();
+ try{
+  const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+  if(!db){$("app").innerHTML='<div class="empty">سجّل الدخول بحساب claude.ai وافتح الرابط عبر دعوة من مدير النظام.</div>';return}
+  S.db=db;S.user=user;S.canDel=!!(user&&user.canEdit&&user.canEdit());
+  const w=user&&user.can?user.can("data.write"):null;S.canWrite=w!==false;
+  if(user){try{S.me=await user.id();const pr=(await user.profiles([S.me]))[S.me];await db.doc("members/"+S.me).set({name:(pr&&pr.name)||"عضو",seen:Date.now()})}catch(e){}}
+  sub("episodes","ep");sub("tasks","tk");sub("guests","gs");sub("qa","qa");sub("members","mem");sub("roles","rl");sub("shoots","sh");sub("segs","sg");
+ }catch(e){$("app").innerHTML='<div class="empty">تعذر الاتصال بقاعدة البيانات.</div>'}
+})();
+</script>
+</body>
+</html>
