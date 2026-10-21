@@ -236,7 +236,34 @@ function tm(){return `<div class="wrap"><table><tr><th>العضو</th><th>الد
 function render(keep){if(!can(S.tab))S.tab="home";nav();const v={home,my,ref,qa:qas,ep:eps,tk:tks,gs:gss,tm}[S.tab]();$("app").innerHTML=v;if(["ep","tk","gs","qa"].includes(S.tab)&&!(S.tab==="ep"&&S.cur)){bind(S.tab);if(keep){const q=$("q");q.focus();q.setSelectionRange(q.value.length,q.value.length)}}if(S.tab==="my")document.querySelectorAll("[data-id]").forEach(el=>el.onclick=()=>openForm(el.dataset.k,S[el.dataset.k].find(x=>x.id===el.dataset.id)));if(S.tab==="ep"&&S.cur)bindEp();if(S.tab==="ref")bindRef();if(S.tab==="tm")document.querySelectorAll("[data-m]").forEach(s=>s.onchange=()=>S.db.doc("roles/"+s.dataset.m).set({role:s.value}).then(()=>toast("تم تحديث الدور")).catch(()=>toast("للمدير فقط")))}
 
 function sub(col,key){S.db.collection(col).onSnapshot(s=>{const a=[];(s.docs||[]).forEach(d=>a.push({...(d.data?d.data():d),id:d.id}));S[key]=a;if(key==="rl")S.roles=Object.fromEntries(a.map(r=>[r.id,r.role]));render(document.activeElement&&document.activeElement.id==="q")},e=>{$("app").innerHTML='<div class="empty">تعذر تحميل البيانات: '+esc(e.message)+'</div>'})}
-
+/* ===== صندوق الأفكار ===== */
+const IST=["جديدة","تحتاج بحثًا","قيد الدراسة","بانتظار الاعتماد","معتمدة","مرفوضة","محولة إلى حلقة"];
+const N6=["0","1","2","3","4","5"];
+ALL.splice(ALL.findIndex(a=>a[0]==="ep")+1,0,["id","💡 صندوق الأفكار"]);
+Object.values(ROLES).forEach(r=>{r[1]+=" id"});
+FORMS.id={col:"ideas",title:"فكرة",st:IST,f:[["title","عنوان الفكرة","text"],["why","سبب أهمية الموضوع","area"],["angle","الزاوية المقترحة للمعالجة","area"],["audience","الجمهور المتوقع","text"],["src","المصادر الأولية","text"],["prio","الأولوية","sel",PR],["s1","ملاءمة هوية القناة (من 5)","sel",N6],["s2","قوة الموضوع (من 5)","sel",N6],["s3","توافر المصادر (من 5)","sel",N6],["s4","قابلية الإنتاج (من 5)","sel",N6]]};
+S.ia=[];
+const iTimer=setInterval(()=>{if(S.db){clearInterval(iTimer);sub("ideas","ia")}},300);
+const isc=x=>["s1","s2","s3","s4"].reduce((a,k)=>a+(+x[k]||0),0);
+function ideasView(){const l=flt(S.ia,["title","why","angle","audience","src"]).sort((a,b)=>isc(b)-isc(a)||(b.votes||[]).length-(a.votes||[]).length);
+return bar("id",IST)+(l.length?l.map(x=>`<div class="card"><b>${esc(x.title)}</b> <span class="tag">${x.status}</span> <span class="tag">${esc(x.prio)}</span> ${isc(x)?`<span class="tag">التقييم ${isc(x)}/20</span>`:""}<div>${esc(x.angle)}</div><div style="color:var(--mu);font-size:13px">${esc(x.why)}</div><div class="bar"><button data-vote="${x.id}">👍 ${(x.votes||[]).length}</button><button data-ed="${x.id}">تعديل</button>${x.epId?`<button class="pri" data-go="${x.epId}">فتح الحلقة</button>`:can("ep")?`<button class="pri" data-cv="${x.id}">حوّل إلى حلقة ونفّذ</button>`:""}</div></div>`).join(""):'<div class="empty">صندوق الأفكار فاضي. اضغط «+ إضافة» واكتب أول فكرة.</div>')}
+function bindIdeas(){const q=$("q");q.oninput=()=>{S.q=q.value;render(true)};$("f").onchange=e=>{S.f=e.target.value;render()};if($("add"))$("add").onclick=()=>openForm("id");
+document.querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>openForm("id",S.ia.find(x=>x.id===b.dataset.ed)));
+document.querySelectorAll("[data-vote]").forEach(b=>b.onclick=()=>{const x=S.ia.find(i=>i.id===b.dataset.vote),v=x.votes||[];S.db.doc("ideas/"+x.id).update({votes:v.includes(S.me)?v.filter(u=>u!==S.me):[...v,S.me]})});
+document.querySelectorAll("[data-cv]").forEach(b=>b.onclick=()=>convertIdea(b.dataset.cv));
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{S.tab="ep";S.cur=b.dataset.go;S.et="ov";render()})}
+async function convertIdea(id){const x=S.ia.find(i=>i.id===id);if(!x||x.epId)return;
+if(!confirm("تحويل الفكرة إلى حلقة؟ يُنشأ معها فقرات ومهام التنفيذ الأساسية."))return;
+const now=Date.now(),ep=S.db.collection("episodes").doc();
+try{await ep.set({title:x.title,topic:x.angle||"",notes:[x.why,x.audience&&("الجمهور: "+x.audience),x.src&&("المصادر: "+x.src)].filter(Boolean).join("\n"),status:"معتمدة",ideaId:x.id,created:now,updated:now,by:S.me});
+for(const t of["البحث وإعداد المحاور","ترشيح الضيف والتواصل معه","كتابة الفقرات والأسئلة","جلسة التصوير","المونتاج","المراجعة والاعتماد","النشر"])await S.db.collection("tasks").doc().set({title:t,epId:ep.id,status:"جديدة",prio:"متوسطة",assigneeId:"",assignee:"",created:now,updated:now,by:S.me});
+let o=0;for(const t of["المقدمة","المحور الرئيسي","الخاتمة"])await S.db.collection("segs").doc().set({title:t,epId:ep.id,ord:String(++o),status:"قيد الإعداد",created:now,updated:now,by:S.me});
+await S.db.doc("ideas/"+x.id).update({status:"محولة إلى حلقة",epId:ep.id,updated:now});
+toast("تم التحويل إلى حلقة");for(let i=0;i<20&&!S.ep.find(p=>p.id===ep.id);i++)await new Promise(r=>setTimeout(r,100));
+S.tab="ep";S.cur=ep.id;S.et="ov";render()}catch(e){toast("تعذر التحويل: لا توجد صلاحية")}}
+const _render=render;
+render=function(keep){if(S.tab==="id"){if(can("id")){nav();$("app").innerHTML=ideasView();bindIdeas();if(keep){const q=$("q");q.focus();q.setSelectionRange(q.value.length,q.value.length)}return}S.tab="home"}_render(keep)};
+/* ===== نهاية صندوق الأفكار ===== */
 (async()=>{
  render();
  try{
