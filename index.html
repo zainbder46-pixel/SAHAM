@@ -53,7 +53,7 @@ dialog input,dialog select,dialog textarea{width:100%;background:var(--bg);borde
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 const SB_URL="https://afmmjxoemrvgdagxvmrj.supabase.co",SB_KEY="PUT_SUPABASE_ANON_KEY";
-const sb_publishable_wqXAovzuEhq8JTYt5l1BqA_MaPM6-ew
+const SB_URL="https://afmmjxoemrvgdagxvmrj.supabase.co",SB_KEY="sb_publishable_wqXAovzuEhq8JTYt5l1BqA_MaPM6-ew";
 const READY=new Promise(r=>{window.__r=r});
 async function afterLogin(s){SES=s;const{data}=await sb.from("admins").select("user_id").eq("user_id",s.user.id);ADMIN=!!(data&&data.length);document.getElementById("login").style.display="none";document.querySelector("header").insertAdjacentHTML("beforeend",'<button onclick="doLogout()">خروج</button>');window.__r()}
 sb.auth.getSession().then(({data})=>{if(data.session)afterLogin(data.session);else document.getElementById("login").style.display="flex"});
