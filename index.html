@@ -50,17 +50,18 @@ dialog input,dialog select,dialog textarea{width:100%;background:var(--bg);borde
 <dialog id="dlg"></dialog>
 <div id="login" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:50;align-items:center;justify-content:center;padding:16px"><div class="card" style="width:min(380px,100%);padding:20px"><h2 style="color:var(--gold);margin:0 0 4px">MASAHAM OS</h2><div style="color:var(--mu);margin-bottom:12px">تسجيل الدخول إلى نظام قناة مع سهم</div><label>البريد الإلكتروني</label><input id="lem" type="email" autocomplete="username" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px"><label>كلمة المرور</label><input id="lpw" type="password" autocomplete="current-password" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px" onkeydown="if(event.key==='Enter')doLogin()"><div id="lmsg" style="color:var(--red);min-height:20px;margin-top:8px"></div><button class="pri" style="width:100%" onclick="doLogin()">دخول</button><div style="color:var(--mu);font-size:12px;margin-top:10px">الحسابات يضيفها مدير النظام فقط. نسيت كلمة المرور؟ اطلبها من المدير.</div></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
-firebase.initializeApp({apiKey:"PUT_API_KEY",authDomain:"PUT_PROJECT_ID.firebaseapp.com",projectId:"PUT_PROJECT_ID",appId:"PUT_APP_ID"});
-const auth=firebase.auth(),fs=firebase.firestore();let SES=null,ADMIN=false,GO=false;
+const SB_URL="https://afmmjxoemrvgdagxvmrj.supabase.co",SB_KEY="PUT_SUPABASE_ANON_KEY";
+const sb_publishable_wqXAovzuEhq8JTYt5l1BqA_MaPM6-ew
 const READY=new Promise(r=>{window.__r=r});
-auth.onAuthStateChanged(async u=>{if(!u){document.getElementById("login").style.display="flex";return}if(GO)return;GO=true;SES=u;try{ADMIN=(await fs.doc("admins/"+u.uid).get()).exists}catch(e){}document.getElementById("login").style.display="none";document.querySelector("header").insertAdjacentHTML("beforeend",'<button onclick="doLogout()">خروج</button>');window.__r()});
-function doLogin(){const m=document.getElementById("lmsg");m.textContent="";auth.signInWithEmailAndPassword(document.getElementById("lem").value.trim(),document.getElementById("lpw").value).catch(()=>{m.textContent="البريد أو كلمة المرور غير صحيحة"})}
-function doLogout(){auth.signOut().then(()=>location.reload())}
-window.claude={use:async n=>{await READY;if(n==="db")return fs;if(n==="user")return{id:async()=>SES.uid,profiles:async ids=>Object.fromEntries(ids.map(i=>[i,{name:SES.displayName||SES.email.split("@")[0]}])),canEdit:()=>ADMIN,isOwner:()=>ADMIN,can:()=>null};return null}};
+async function afterLogin(s){SES=s;const{data}=await sb.from("admins").select("user_id").eq("user_id",s.user.id);ADMIN=!!(data&&data.length);document.getElementById("login").style.display="none";document.querySelector("header").insertAdjacentHTML("beforeend",'<button onclick="doLogout()">خروج</button>');window.__r()}
+sb.auth.getSession().then(({data})=>{if(data.session)afterLogin(data.session);else document.getElementById("login").style.display="flex"});
+async function doLogin(){const m=document.getElementById("lmsg");m.textContent="";const{data,error}=await sb.auth.signInWithPassword({email:document.getElementById("lem").value.trim(),password:document.getElementById("lpw").value});if(error){m.textContent="البريد أو كلمة المرور غير صحيحة";return}afterLogin(data.session)}
+function doLogout(){sb.auth.signOut().then(()=>location.reload())}
+const REF=(col,id)=>({id,set:async o=>{const{error}=await sb.from("docs").upsert({col,id,data:o});if(error)throw error},update:async o=>{const{data}=await sb.from("docs").select("data").eq("col",col).eq("id",id).maybeSingle();const{error}=await sb.from("docs").upsert({col,id,data:{...(data?data.data:{}),...o}});if(error)throw error},delete:async()=>{const{error}=await sb.from("docs").delete().eq("col",col).eq("id",id);if(error)throw error}});
+const DBX={doc:p=>{const[c,i]=p.split("/");return REF(c,i)},collection:c=>({doc:i=>REF(c,i||crypto.randomUUID()),onSnapshot(cb,eb){const load=async()=>{const{data,error}=await sb.from("docs").select("id,data").eq("col",c);if(error){eb&&eb(error);return}cb({docs:data.map(r=>({id:r.id,data:()=>r.data}))})};load();sb.channel("c-"+c+Math.random()).on("postgres_changes",{event:"*",schema:"public",table:"docs",filter:"col=eq."+c},load).subscribe()}})};
+window.claude={use:async n=>{await READY;if(n==="db")return DBX;if(n==="user")return{id:async()=>SES.user.id,profiles:async ids=>Object.fromEntries(ids.map(i=>[i,{name:(SES.user.user_metadata&&SES.user.user_metadata.name)||SES.user.email.split("@")[0]}])),canEdit:()=>ADMIN,isOwner:()=>ADMIN,can:()=>null};return null}};
 </script>
 <script>
 const EP=["فكرة جديدة","قيد التقييم","بانتظار الاعتماد","معتمدة","قيد الإعداد","جاهزة للتصوير","تم التصوير","قيد المونتاج","مراجعة أولى","تعديلات مطلوبة","مراجعة نهائية","معتمدة للنشر","مجدولة","منشورة","مؤرشفة","ملغاة"];
@@ -99,8 +100,8 @@ const FORMS={
 function openForm(k,rec,pre){
  const F=FORMS[k],r=rec||pre||{};
  const inp=([n,l,t,o])=>`<label>${l}</label>`+(t==="area"?`<textarea name="${n}" rows="3">${esc(r[n])}</textarea>`:t==="segsel"?`<select name="${n}"><option value="">—</option>${S.sg.filter(s=>!r.epId||s.epId===r.epId).map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.title)}</option>`).join("")}</select>`:t==="epsel"?`<select name="${n}"><option value="">—</option>${S.ep.map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.title)}</option>`).join("")}</select>`:t==="mem"?`<select name="${n}"><option value="">—</option>${S.mem.map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.name)}</option>`).join("")}</select>`:t==="sel"?`<select name="${n}">${o.map(x=>`<option ${r[n]===x?"selected":""}>${x}</option>`).join("")}</select>`:`<input name="${n}" type="${t}" value="${esc(r[n])}">`);
- const log=k==="gs"&&rec?`<label>سجل التواصل</label>${(r.log||[]).map(x=>`<div class="card">${esc(x.d)} — ${esc(x.t)}</div>`).join("")||'<div class="tag">لا يوجد</div>'}<input id="nl" placeholder="أضف محاولة تواصل (الطريقة والنتيجة)">`:"";
- $("dlg").innerHTML=`<form method="dialog" id="fm"><h3>${rec?"تعديل":"إضافة"} ${F.title}</h3>${F.f.map(inp).join("")}<label>الحالة</label><select name="status">${F.st.map(x=>`<option ${(r.status||F.st[0])===x?"selected":""}>${x}</option>`).join("")}</select>${log}<div class="bar" style="margin-top:14px"><button class="pri" value="ok">حفظ</button><button value="x">إلغاء</button>${rec&&S.canDel?`<button type="button" class="dng" id="dl">حذف</button>`:""}</div></form>`;
+ const log=k==="gs"&&rec?`<label>سجل التواصل</label>${(r.log||[]).map(x=>`<div class="card">${esc(x.d)} —${esc(x.t)}</div>`).join("")||'<div class="tag">لا يوجد</div>'}<input id="nl" placeholder="أضف محاولة تواصل (الطريقة والنتيجة)">`:"";
+ $("dlg").innerHTML=`<form method="dialog" id="fm"><h3>${rec?"تعديل":"إضافة"} ${F.title}</h3>${F.f.map(inp).join("")}<label>الحالة</label><select name="status">${F.st.map(x=>`<option ${(r.status\vert{}\vert{}F.st[0])===x?"selected":""}>${x}</option>`).join("")}</select>${log}<div class="bar" style="margin-top:14px"><button class="pri" value="ok">حفظ</button><button value="x">إلغاء</button>${rec&&S.canDel?`<button type="button" class="dng" id="dl">حذف</button>`:""}</div></form>`;
  const d=$("dlg");d.showModal();
  if(k==="qa"&&rec){const b=document.createElement("button");b.type="button";b.textContent="حوّل لمهمة";b.onclick=async()=>{await S.db.collection("tasks").doc().set({title:rec.q.slice(0,80),assigneeId:rec.to||"",assignee:nm(rec.to),status:"جديدة",notes:"من سؤال: "+rec.q,prio:"متوسطة",created:Date.now(),updated:Date.now(),by:S.me});d.close();toast("تم إنشاء المهمة")};$("fm").querySelector(".bar").append(b)}
  $("fm").onsubmit=async e=>{
@@ -130,9 +131,9 @@ function home(){
  const avg=e.length?Math.round(e.reduce((s,x)=>s+prog(x),0)/e.length):0;
  return `<div class="grid">${kp.map(([l,v,b])=>`<div class="kpi ${b&&v?"bad":""}">${l}<b>${v}</b></div>`).join("")}</div>
  <div class="card">نسبة إنجاز خطة الإنتاج: ${avg}%<div class="pg"><i style="width:${avg}%"></i></div></div>
- <div class="card"><b>توزيع المهام المفتوحة</b><br>${Object.entries(by).map(([n,v])=>`<span class="tag">${esc(n)}: ${v}</span> `).join("")||"لا توجد مهام مفتوحة"}</div>
- <div class="card"><b>تصوير قادم</b>${up.map(x=>`<div>${esc(x.shoot)} — ${esc(x.title)}</div>`).join("")||'<div class="tag">لا يوجد</div>'}</div>
- <div class="card"><b>متابعات ضيوف مستحقة</b>${fol.map(g=>`<div class="tag late">${esc(g.name)} — ${esc(g.follow)}</div>`).join(" ")||'<div class="tag">لا يوجد</div>'}</div>
+ <div class="card"><b>توزيع المهام المفتوحة</b><br>${Object.entries(by).map(([n,v])=>`<span class="tag">${esc(n)}:${v}</span> `).join("")||"لا توجد مهام مفتوحة"}</div>
+ <div class="card"><b>تصوير قادم</b>${up.map(x=>`<div>${esc(x.shoot)} —${esc(x.title)}</div>`).join("")||'<div class="tag">لا يوجد</div>'}</div>
+ <div class="card"><b>متابعات ضيوف مستحقة</b>${fol.map(g=>`<div class="tag late">${esc(g.name)} —${esc(g.follow)}</div>`).join(" ")||'<div class="tag">لا يوجد</div>'}</div>
  ${!e.length&&!t.length?'<div class="empty">ابدأ بإضافة أول حلقة من تبويب «الحلقات»، وستظهر الأرقام هنا تلقائيًا.</div>':""}`}
 
 function eps(){if(S.cur)return epPage();
@@ -142,7 +143,7 @@ function eps(){if(S.cur)return epPage();
 
 function tks(){
  const l=flt(S.tk,["title","assignee","episode"]).sort((a,b)=>(a.due||"9")>(b.due||"9")?1:-1);
- return bar("tk",TK)+(l.length?`<div class="wrap"><table><tr><th>المهمة</th><th>المسؤول</th><th>الحلقة</th><th>الاستحقاق</th><th>الحالة</th></tr>${l.map(x=>`<tr data-id="${x.id}" style="cursor:pointer"><td>${esc(x.title)}</td><td>${esc(x.assignee)}</td><td>${esc(x.episode)}</td><td>${esc(x.due)} ${late(x)?'<span class="tag late">متأخرة</span>':""}</td><td><span class="tag">${x.status}</span></td></tr>`).join("")}</table></div>`:'<div class="empty">لا توجد مهام مطابقة.</div>')}
+ return bar("tk",TK)+(l.length?`<div class="wrap"><table><tr><th>المهمة</th><th>المسؤول</th><th>الحلقة</th><th>الاستحقاق</th><th>الحالة</th></tr>${l.map(x=>`<tr data-id="${x.id}" style="cursor:pointer"><td>${esc(x.title)}</td><td>${esc(x.assignee)}</td><td>${esc(x.episode)}</td><td>${esc(x.due)}${late(x)?'<span class="tag late">متأخرة</span>':""}</td><td><span class="tag">${x.status}</span></td></tr>`).join("")}</table></div>`:'<div class="empty">لا توجد مهام مطابقة.</div>')}
 
 function gss(){
  const l=flt(S.gs,["name","job","field","owner"]);
