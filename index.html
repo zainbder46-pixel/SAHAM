@@ -48,7 +48,19 @@ dialog input,dialog select,dialog textarea{width:100%;background:var(--bg);borde
 <main id="app"><div class="empty">جاري التحميل…</div></main>
 <div class="toast" id="toast"></div>
 <dialog id="dlg"></dialog>
-<div id="login" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:50;align-items:center;justify-content:center;padding:16px"><div class="card" style="width:min(380px,100%);padding:20px"><h2 style="color:var(--gold);margin:0 0 4px">MASAHAM OS</h2><div style="color:var(--mu);margin-bottom:12px">تسجيل الدخول إلى نظام قناة مع سهم</div><label>البريد الإلكتروني</label><input id="lem" type="email" autocomplete="username" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px"><label>كلمة المرور</label><input id="lpw" type="password" autocomplete="current-password" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px" onkeydown="if(event.key==='Enter')doLogin()"><div id="lmsg" style="color:var(--red);min-height:20px;margin-top:8px"></div><button class="pri" style="width:100%" onclick="doLogin()">دخول</button><div style="color:var(--mu);font-size:12px;margin-top:10px">الحسابات يضيفها مدير النظام فقط. نسيت كلمة المرور؟ اطلبها من المدير.</div></div></div>
+<div id="login" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:50;align-items:center;justify-content:center;padding:16px">
+  <div class="card" style="width:min(380px,100%);padding:20px">
+    <h2 style="color:var(--gold);margin:0 0 4px">MASAHAM OS</h2>
+    <div style="color:var(--mu);margin-bottom:12px">تسجيل الدخول إلى نظام قناة مع سهم</div>
+    <label>البريد الإلكتروني</label>
+    <input id="lem" type="email" autocomplete="username" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px">
+    <label>كلمة المرور</label>
+    <input id="lpw" type="password" autocomplete="current-password" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px" onkeydown="if(event.key==='Enter')doLogin()">
+    <div id="lmsg" style="color:var(--red);min-height:20px;margin-top:8px"></div>
+    <button class="pri" style="width:100%" onclick="doLogin()">دخول</button>
+    <div style="color:var(--mu);font-size:12px;margin-top:10px">الحسابات يضيفها مدير النظام فقط. نسيت كلمة المرور؟ اطلبها من المدير.</div>
+  </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
@@ -85,7 +97,6 @@ const QS=["مفتوح","تمت الإجابة","معتمد"];
 const ROLES={admin:["مدير النظام","home my qa ep tk gs tm"],manager:["مدير القناة","home my qa ep tk gs"],producer:["منتج","home my qa ep tk gs"],researcher:["باحث","home my qa ep tk"],guestco:["منسق ضيوف","home my qa gs tk"],crew:["مصور / مونتير","home my qa ep tk"],member:["عضو فريق","home my qa"]};
 const role=()=>S.canDel?"admin":(S.roles[S.me]&&ROLES[S.roles[S.me]]?S.roles[S.me]:"member");
 const can=t=>t==="ref"||ROLES[role()][1].split(" ").includes(t);
-const nm=id=>(S.mem.find(m=>m.id===id)||{}).name||"";
 function nav(){$("nav").innerHTML=ALL.filter(([k])=>can(k)).map(([k,v])=>`<button class="${S.tab===k?"on":""}" data-k="${k}">${v}</button>`).join("");
  $("nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{S.tab=b.dataset.k;S.q="";S.f="";S.cur="";render()})}
 
@@ -97,11 +108,13 @@ const FORMS={
  sh:{col:"shoots",title:"جلسة تصوير",st:["مجدولة","تمت","مؤجلة"],f:[["date","التاريخ","date"],["time","الوقت","text"],["loc","الموقع","text"],["epId","الحلقة","epsel"],["crew","الفريق والمشاركون","text"],["gear","المعدات (سطر لكل عنصر)","area"],["run","ترتيب الفقرات (سطر لكل فقرة)","area"],["notes","ملاحظات المخرج","area"]]},
  sg:{col:"segs",title:"فقرة",st:["قيد الإعداد","جاهزة","تم تصويرها"],f:[["title","عنوان الفقرة","text"],["epId","الحلقة","epsel"],["ord","الترتيب (رقم)","text"],["dur","المدة بالدقائق","text"],["notes","ملاحظات الفقرة","area"]]}
 };
+
 function openForm(k,rec,pre){
  const F=FORMS[k],r=rec||pre||{};
  const inp=([n,l,t,o])=>`<label>${l}</label>`+(t==="area"?`<textarea name="${n}" rows="3">${esc(r[n])}</textarea>`:t==="segsel"?`<select name="${n}"><option value="">—</option>${S.sg.filter(s=>!r.epId||s.epId===r.epId).map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.title)}</option>`).join("")}</select>`:t==="epsel"?`<select name="${n}"><option value="">—</option>${S.ep.map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.title)}</option>`).join("")}</select>`:t==="mem"?`<select name="${n}"><option value="">—</option>${S.mem.map(m=>`<option value="${m.id}" ${r[n]===m.id?"selected":""}>${esc(m.name)}</option>`).join("")}</select>`:t==="sel"?`<select name="${n}">${o.map(x=>`<option ${r[n]===x?"selected":""}>${x}</option>`).join("")}</select>`:`<input name="${n}" type="${t}" value="${esc(r[n])}">`);
  const log=k==="gs"&&rec?`<label>سجل التواصل</label>${(r.log||[]).map(x=>`<div class="card">${esc(x.d)} —${esc(x.t)}</div>`).join("")||'<div class="tag">لا يوجد</div>'}<input id="nl" placeholder="أضف محاولة تواصل (الطريقة والنتيجة)">`:"";
- $("dlg").innerHTML=`<form method="dialog" id="fm"><h3>${rec?"تعديل":"إضافة"} ${F.title}</h3>${F.f.map(inp).join("")}<label>الحالة</label><select name="status">${F.st.map(x=>`<option ${(r.status\vert{}\vert{}F.st[0])===x?"selected":""}>${x}</option>`).join("")}</select>${log}<div class="bar" style="margin-top:14px"><button class="pri" value="ok">حفظ</button><button value="x">إلغاء</button>${rec&&S.canDel?`<button type="button" class="dng" id="dl">حذف</button>`:""}</div></form>`;
+ // هنا تم إصلاح الخطأ (r.status || F.st[0])
+ $("dlg").innerHTML=`<form method="dialog" id="fm"><h3>${rec?"تعديل":"إضافة"} ${F.title}</h3>${F.f.map(inp).join("")}<label>الحالة</label><select name="status">${F.st.map(x=>`<option ${(r.status \vert{}\vert{} F.st[0])===x?"selected":""}>${x}</option>`).join("")}</select>${log}<div class="bar" style="margin-top:14px"><button class="pri" value="ok">حفظ</button><button value="x">إلغاء</button>${rec&&S.canDel?`<button type="button" class="dng" id="dl">حذف</button>`:""}</div></form>`;
  const d=$("dlg");d.showModal();
  if(k==="qa"&&rec){const b=document.createElement("button");b.type="button";b.textContent="حوّل لمهمة";b.onclick=async()=>{await S.db.collection("tasks").doc().set({title:rec.q.slice(0,80),assigneeId:rec.to||"",assignee:nm(rec.to),status:"جديدة",notes:"من سؤال: "+rec.q,prio:"متوسطة",created:Date.now(),updated:Date.now(),by:S.me});d.close();toast("تم إنشاء المهمة")};$("fm").querySelector(".bar").append(b)}
  $("fm").onsubmit=async e=>{
