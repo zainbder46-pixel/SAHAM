@@ -412,6 +412,12 @@ function augTasks(){
 const _render5=render;
 render=function(keep){_render5(keep);augTasks()};
 /* ===== نهاية دور الإعداد وزر حالة المهمة ===== */
+  /* ===== إصلاح تبويب الإعداد ===== */
+const _ap3=applyPerms;
+applyPerms=function(){_ap3();Object.keys(ROLES).forEach(k=>{if(k!=="off"&&/\bep\b/.test(ROLES[k][1])&&!/\bpp\b/.test(ROLES[k][1]))ROLES[k][1]+=" pp"})};
+const _render6=render;
+render=function(keep){try{_render6(keep)}catch(e){try{nav()}catch(x){}$("app").innerHTML='<div class="card" style="border-color:var(--red)">⚠️ خطأ في الصفحة: '+esc(e.message)+'<br>أرسل لي هذا النص</div>'}};
+/* ===== نهاية الإصلاح ===== */
   (async()=>{
  render();
  try{
