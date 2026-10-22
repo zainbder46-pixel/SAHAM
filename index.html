@@ -393,6 +393,25 @@ render=function(keep){_render3(keep);
   if(S.pr==="admin")document.querySelectorAll('[data-g="role"]').forEach(c=>{c.checked=true;c.disabled=true});
   $("app").insertAdjacentHTML("afterbegin",'<div class="card">👑 <b>مالك النظام</b>: يملك كل الصلاحيات دائمًا، ولا تتغير من هنا. تعيين عضو بهذا الدور يعطيه كل الأقسام داخل الصفحة فقط، أما صلاحيات الخادم (الحذف وتحديد الأدوار) فتبقى بحساب المدير الفعلي.</div>')}};
 /* ===== نهاية دور مالك النظام ===== */
+  /* ===== دور الإعداد وزر حالة المهمة ===== */
+ROLES.prep=["الإعداد","home my qa ep tk gs id"];
+if(typeof BASE!=="undefined"){BASE.prep=baseP("prep");BASE.prep.tk={v:true,c:false,e:false,d:false};BASE.prep.gs={v:true,c:false,e:false,d:false}}
+const _qst=document.createElement("style");
+_qst.textContent=".qsb{margin-inline-start:8px;font-size:12px;padding:4px 10px;border-radius:99px;color:var(--gold);border-color:var(--gold)}";
+document.head.appendChild(_qst);
+const qsBtn=t=>`<button type="button" class="qsb" data-qsb="${t.id}" title="تحديث حالة المهمة">🔄 ${t.status}</button>`;
+function qsDlg(id){const t=S.tk.find(x=>x.id===id);if(!t)return;
+ const ok=S.canDel||t.assigneeId===S.me||(typeof perm==="function"&&perm("tk","e"));
+ if(!ok){toast("ما عندك صلاحية تحديث هذي المهمة");return}
+ const d=$("dlg");d.innerHTML=`<form method="dialog"><h3>تحديث حالة المهمة</h3><div style="margin-bottom:8px">${esc(t.title)}</div><div class="bar" style="flex-direction:column">${TK.map(s=>`<button type="button" class="${t.status===s?"on":""}" data-st="${s}">${s}</button>`).join("")}</div><div class="bar"><button value="x">إغلاق</button></div></form>`;d.showModal();
+ d.querySelectorAll("[data-st]").forEach(b=>b.onclick=async()=>{const s=b.dataset.st;try{await S.db.doc("tasks/"+id).update({status:s,updated:Date.now(),doneAt:s==="مكتملة"?today():""});toast("تم تحديث الحالة: "+s);d.close()}catch(e){toast("تعذر التحديث")}})}
+function augTasks(){
+ document.querySelectorAll("tr[data-id]").forEach(tr=>{const t=S.tk.find(x=>x.id===tr.dataset.id);if(!t||tr.querySelector(".qsb"))return;const c=tr.cells[tr.cells.length-1];if(c&&c.querySelector(".tag"))c.innerHTML=qsBtn(t)});
+ document.querySelectorAll('[data-k="tk"][data-id]').forEach(el=>{const t=S.tk.find(x=>x.id===el.dataset.id);if(!t||el.querySelector(".qsb"))return;el.insertAdjacentHTML("beforeend",qsBtn(t))});
+ document.querySelectorAll(".qsb").forEach(b=>b.onclick=e=>{e.stopPropagation();qsDlg(b.dataset.qsb)})}
+const _render5=render;
+render=function(keep){_render5(keep);augTasks()};
+/* ===== نهاية دور الإعداد وزر حالة المهمة ===== */
   (async()=>{
  render();
  try{
