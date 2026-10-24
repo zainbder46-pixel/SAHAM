@@ -418,57 +418,106 @@ applyPerms=function(){_ap3();Object.keys(ROLES).forEach(k=>{if(k!=="off"&&/\bep\
 const _render6=render;
 render=function(keep){try{_render6(keep)}catch(e){try{nav()}catch(x){}$("app").innerHTML='<div class="card" style="border-color:var(--red)">⚠️ خطأ في الصفحة: '+esc(e.message)+'<br>أرسل لي هذا النص</div>'}};
 /* ===== نهاية الإصلاح ===== */
- /* ===== ورقة التصوير الجديدة + تبويب النقاط ===== */
-const _sty=document.createElement("style");
-_sty.textContent=`.sq{display:flex;gap:10px;align-items:flex-start;font-size:17px;cursor:pointer;padding:6px 0}.bx{font-size:26px;line-height:1}.stq{border-right:5px solid var(--line)}.stq.done{border-right-color:var(--grn)}.stq.done .sq b{opacity:.55;text-decoration:line-through}.sa2{display:flex;gap:10px;align-items:flex-start;padding:10px;margin-top:6px;border:1px solid var(--line);border-radius:10px;cursor:pointer}.sa2.on{border-color:var(--grn);background:var(--bg)}.sa2 input{width:22px;height:22px;flex:none}.sbd{position:sticky;top:calc(env(safe-area-inset-top,0px) + 58px);z-index:4;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;background:var(--bg);padding:8px 0}.sbc{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sbc.lead{border-color:var(--gold)}.sbn{color:var(--mu);cursor:pointer}.sbig{font-size:54px;font-weight:800;color:var(--gold);line-height:1.1}.sbc .bar{justify-content:center;margin:6px 0 0}.sa.on,.sp.on{background:var(--gold);color:#111;border-color:var(--gold);font-weight:700}.sa{flex:1;min-width:90px;padding:12px 8px}`;
-document.head.appendChild(_sty);
+/* ===== النسخة الثالثة: VAR + ورقة التصوير + النقاط ===== */
+const v3css=document.createElement("style");
+v3css.textContent="mark{background:var(--gold);color:#111;border-radius:3px;padding:0 1px}.vq{width:100%;padding:14px;font-size:20px;background:var(--bg);border:2px solid var(--gold);border-radius:12px;color:var(--tx)}.va{padding:9px;border-radius:8px;margin-top:6px;border:1px solid var(--gold);font-size:16px}.qrow{display:flex;gap:8px;align-items:center;cursor:pointer;font-size:16px}.qrow.dn{opacity:.55}.qn{color:var(--gold);font-weight:700;min-width:26px}#v3c{width:min(640px,100vw);max-width:100vw;height:100%;max-height:100%;margin:0 auto;border-radius:0;overflow:auto}#v3c h2{margin:6px 0;font-size:24px;line-height:1.5}.ca{display:flex;gap:10px;align-items:center;padding:14px;margin-top:8px;border:2px solid var(--line);border-radius:12px;font-size:18px;cursor:pointer;width:100%;text-align:right;background:var(--bg)}.ca.sd{border-color:var(--grn)}.ca.rp{border-color:var(--red)}.cc{padding:10px 16px;font-size:16px}.sbd{position:sticky;top:calc(env(safe-area-inset-top,0px) + 58px);z-index:4;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;background:var(--bg);padding:8px 0}.sbc{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sbc.lead{border-color:var(--gold)}.sbig{font-size:50px;font-weight:800;color:var(--gold);line-height:1.1}.sbc .bar{justify-content:center;margin:6px 0 0}.sa{flex:1;min-width:90px;padding:12px 8px}.sa.on,.sp.on{background:var(--gold);color:#111;border-color:var(--gold);font-weight:700}";
+document.head.appendChild(v3css);
 
-studio=function(id,qs){const sg=S.sg.filter(x=>x.epId===id).sort((a,b)=>(+a.ord||99)-(+b.ord||99)),all=qs.reduce((a,q)=>a+bank(q).length,0),cvd=qs.reduce((a,q)=>a+(q.cov||[]).length,0),k=qs.filter(x=>x.asked).length;let n=0;
-const card=q=>{n++;const bk=bank(q),cs=q.cov||[];return `<div class="card stq ${q.asked?"done":""}"><div class="sq" data-ask="${q.id}"><span class="bx">${q.asked?"☑":"☐"}</span><b>${n}. ${esc(q.q)}</b></div>${bk.length?bk.map((a,i)=>{const on=cs.includes(norm(a.t));return `<label class="sa2 ${on?"on":""}"><input type="checkbox" data-cov="${q.id}|${i}" ${on?"checked":""}><span>${esc(a.t)}${a.src?` <span class="tag">${esc(a.src)}</span>`:""}</span></label>`}).join(""):'<div class="tag late" style="margin-top:6px">⚠️ لا توجد إجابات في البنك</div>'}<div class="bar"><button onclick="S.et='var';S.vs='${q.segId||""}';S.sel='${q.id}';render()">🎬 VAR</button></div></div>`};
-const grp=(t,l)=>l.length?`<div style="margin-top:14px"><h3 style="color:var(--gold);margin:6px 0">${t}</h3>${l.map(card).join("")}</div>`:"";
-const o=qs.filter(x=>!sg.some(s=>s.id===x.segId));
-return `<div class="card"><b>طُرح ${k} من ${qs.length} سؤال · غُطّيت ${cvd} من ${all} إجابة</b><div class="pg"><i style="width:${qs.length?Math.round(k/qs.length*100):0}%"></i></div><div class="bar"><button data-sx="1">إعادة ضبط التحديد</button></div></div>`+(qs.length?sg.map(s=>grp((s.ord?s.ord+". ":"")+esc(s.title)+(s.dur?` (${esc(s.dur)} د)`:""),qs.filter(x=>x.segId===s.id))).join("")+grp("بدون فقرة",o):'<div class="empty">أضف أسئلة من تبويب الفقرات والأسئلة.</div>')};
+function v3n(t){t=String(t==null?"":t);let n="",m=[];for(let i=0;i<t.length;i++){const c=t[i];if((c>="\u064B"&&c<="\u0652")||c==="\u0640")continue;let x=c;if(c==="\u0623"||c==="\u0625"||c==="\u0622")x="\u0627";else if(c==="\u0649")x="\u064A";else if(c==="\u0629")x="\u0647";else if(c>="\u0660"&&c<="\u0669")x=String(c.charCodeAt(0)-1632);else{const l=c.toLowerCase();if(l.length===1)x=l}n+=x;m.push(i)}return{n:n,m:m}}
+const v3t=s=>String(s||"").split(/\s+/).map(w=>v3n(w).n).filter(Boolean);
+const v3has=(t,ts)=>{if(!ts.length)return true;const n=v3n(t).n;return ts.every(w=>n.indexOf(w)>=0)};
+function v3hl(t,ts){t=String(t==null?"":t);if(!ts.length)return esc(t);const r=v3n(t),n=r.n,m=r.m,mk=new Array(t.length).fill(0);ts.forEach(w=>{let p=n.indexOf(w);while(p>=0){for(let j=p;j<p+w.length;j++)mk[m[j]]=1;p=n.indexOf(w,p+1)}});let o="",on=0;for(let i=0;i<t.length;i++){if(mk[i]&&!on){o+="<mark>";on=1}else if(!mk[i]&&on){o+="</mark>";on=0}o+=esc(t[i])}return o+(on?"</mark>":"")}
+const v3ord=(a,b)=>(+a.ord||99)-(+b.ord||99);
 
-S.sc=[];
-const scT=setInterval(()=>{if(S.db){clearInterval(scT);sub("scores","sc")}},300);
-const scGet=id=>S.sc.find(x=>x.id===id)||{};
-const scD=id=>{const d=scGet(id);return{pl:d.pl&&d.pl.length?d.pl:["المقدم","الضيف"],it:d.it||{},man:d.man||{},log:d.log||[],lock:!!d.lock}};
-const scTot=(d,qs)=>{const t=d.pl.map(()=>0);qs.forEach(q=>{const r=d.it[q.id];if(r&&r.w!=null&&r.w>=0&&r.w<t.length)t[r.w]+=+r.p||1});d.pl.forEach((_,i)=>t[i]+=+d.man[i]||0);return t};
-function scSave(id,o){const r={...scGet(id),...o,updated:Date.now()};delete r.id;const i=S.sc.findIndex(x=>x.id===id),e={...r,id};if(i<0)S.sc.push(e);else S.sc[i]=e;render();S.db.doc("scores/"+id).set(r).catch(()=>toast("تعذر الحفظ: لا توجد صلاحية"))}
-const scOK=()=>S.canDel||(typeof perm==="function"?perm("ep","e"):true);
+/* ---- VAR: بحث بحرف أو أكثر في أي مكان ---- */
+const v3sc=()=>S.qa.filter(x=>!S.scoped||(x.epId===S.cur&&(!S.vs||x.segId===S.vs)));
+refV=function(){return(S.scoped?segChips():tgl(1))+'<input id="vq" class="vq" autocomplete="off" placeholder="اكتب حرفًا أو أكثر، يبحث في أي مكان من الكلمة" value="'+esc(S.vq||"")+'"><div id="vc" style="color:var(--mu);font-size:13px;margin:4px 0"></div><div id="vr"></div>'};
+function v3run(v){const ts=v3t(v),pool=v3sc(),o=$("vr"),c=$("vc");let L=[];
+ pool.forEach(q=>{const bk=bank(q),qm=v3has(q.q,ts),am=bk.map(a=>v3has(a.t,ts)),an=am.some(Boolean);if(qm||an)L.push({q:q,bk:bk,am:am,an:an})});
+ L.sort((a,b)=>(b.an?1:0)-(a.an?1:0));const tot=L.length;L=L.slice(0,50);
+ c.textContent=ts.length?tot+" سؤال فيه مطابقة":pool.length+" سؤال ضمن النطاق";
+ if(!L.length){o.innerHTML='<div class="empty">'+(pool.length?"ما لقيت مطابقة. جرّب حرفين أو كلمة أقصر.":"ما فيه أسئلة في هذا النطاق.")+"</div>";return}
+ o.innerHTML=L.map(r=>{const s=S.sg.find(g=>g.id===r.q.segId),e=S.ep.find(p=>p.id===r.q.epId),sh=(ts.length&&r.an)?r.bk.filter((_,i)=>r.am[i]):r.bk,hid=r.bk.length-sh.length;
+  return '<div class="card"><div>'+(!S.scoped&&e?'<span class="tag">'+esc(e.title)+"</span> ":"")+(s?'<span class="tag">'+esc(s.title)+"</span>":"")+'</div><b style="font-size:17px">'+v3hl(r.q.q,ts)+"</b>"+(sh.map(a=>'<div class="va">'+v3hl(a.t,ts)+(a.src?' <span class="tag">'+esc(a.src)+"</span>":"")+"</div>").join("")||'<div class="tag late">لا توجد إجابات</div>')+(hid?'<div class="tag">+'+hid+" إجابات أخرى لا تطابق</div>":"")+'<div class="bar"><button data-vopen="'+r.q.id+'">تعديل</button></div></div>'}).join("")}
+bindV=function(){document.querySelectorAll("[data-m2]").forEach(b=>b.onclick=()=>{S.m=b.dataset.m2;render()});document.querySelectorAll("[data-vs]").forEach(b=>b.onclick=()=>{S.vs=b.dataset.vs;render()});
+ const i=$("vq");if(!i)return;i.oninput=()=>{S.vq=i.value;v3run(i.value)};
+ $("vr").onclick=e=>{const b=e.target.closest("[data-vopen]");if(b)openForm("qa",S.qa.find(x=>x.id===b.dataset.vopen))};
+ v3run(i.value);i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch(x){}};
 
-function scoreView(id,qs){const d=scD(id),pl=d.pl,tot=scTot(d,qs),mx=Math.max(...tot),lead=mx>0&&tot.filter(t=>t===mx).length===1?tot.indexOf(mx):-1,dn=qs.filter(q=>d.it[q.id]&&d.it[q.id].w!=null).length;
-const sg=S.sg.filter(x=>x.epId===id),ord=q=>{const s=sg.find(x=>x.id===q.segId);return s?(+s.ord||99):999},L=[...qs].sort((a,b)=>ord(a)-ord(b)||(a.created||0)-(b.created||0)),dis=d.lock?"disabled":"";
-return (d.lock?`<div class="card" style="border-color:var(--gold);font-size:20px;text-align:center">🏆 ${lead>=0?"الفائز: <b>"+esc(pl[lead])+"</b> بـ "+mx+" نقطة":"النتيجة النهائية: تعادل"}</div>`:"")+
-`<div class="sbd">${pl.map((n,i)=>`<div class="sbc ${lead===i?"lead":""}"><div class="sbn" data-sn="${i}">${esc(n)} ✎</div><div class="sbig">${tot[i]}</div><div class="bar"><button ${dis} data-sm="${i}|-1">−1</button><button ${dis} data-sm="${i}|1">+1</button><button ${dis} data-sm="${i}|2">+2</button></div></div>`).join("")}</div>
-<div class="card" style="font-size:13px;color:var(--mu)">حُسم ${dn} من ${qs.length} سؤال · اضغط اسم اللاعب لتغييره</div>
-<div class="bar">${pl.length<4&&!d.lock?'<button data-sa="1">+ لاعب</button>':""}<button data-su="1" ${dis}>↩ تراجع آخر عملية</button><button data-scp="1">📋 نسخ النتيجة</button><button data-sl="1">${d.lock?"🔓 فتح النتيجة":"🏁 إنهاء الحلقة وقفل النتيجة"}</button><button class="dng" data-s0="1" ${dis}>تصفير</button></div>`+
-(L.length?L.map((q,i)=>{const r=d.it[q.id]||{},pt=r.p||1,bk=bank(q);return `<div class="card" style="border-right:5px solid ${r.w!=null?"var(--grn)":"var(--line)"}"><b>${i+1}. ${esc(q.q)}</b><div class="bar"><span class="tag">النقاط</span>${[1,2,3,5].map(p=>`<button class="sp ${pt===p?"on":""}" ${dis} data-pt="${q.id}|${p}">${p}</button>`).join("")}</div><div class="bar">${pl.map((n,j)=>`<button class="sa ${r.w===j?"on":""}" ${dis} data-aw="${q.id}|${j}">✔ ${esc(n)}</button>`).join("")}<button class="sa ${r.w===-1?"on":""}" ${dis} data-aw="${q.id}|-1">✘ لا أحد</button></div>${bk.length?`<div style="color:var(--mu);font-size:13px">الإجابة: ${bk.slice(0,2).map(a=>esc(a.t)).join(" / ")}</div>`:""}</div>`}).join(""):'<div class="empty">ما فيه أسئلة. أضف أسئلة الحلقة أولًا.</div>')+
-(d.log.length?`<div class="card"><b>آخر العمليات</b>${d.log.slice(-6).reverse().map(l=>`<div style="font-size:13px">${esc(l.txt)}</div>`).join("")}</div>`:"")}
-
-const _epS=epPage;
-epPage=function(){const h=_epS(),i=h.indexOf("</nav>");if(!S.cur||i<0)return h;const btn=`<button class="${S.et==="pt"?"on":""}" data-et="pt">🏆 النقاط</button>`,hd=h.slice(0,i)+btn+"</nav>";if(S.et!=="pt")return hd+h.slice(i+6);return hd+scoreView(S.cur,S.qa.filter(x=>x.epId===S.cur))};
-
-$("app").addEventListener("click",ev=>{if(!S.cur)return;const b=ev.target.closest("[data-cov],[data-sx],[data-aw],[data-pt],[data-sm],[data-sn],[data-sa],[data-su],[data-sl],[data-s0],[data-scp]");if(!b)return;const id=S.cur,d=b.dataset;
- if(d.cov!==undefined&&S.et==="sd"){const[qi,i]=d.cov.split("|"),q=S.qa.find(x=>x.id===qi),a=q&&bank(q)[+i];if(!a)return;const k=norm(a.t),c=q.cov||[],n=c.includes(k)?c.filter(x=>x!==k):[...c,k];q.cov=n;render();S.db.doc("qa/"+qi).update({cov:n}).catch(()=>toast("ما عندك صلاحية"));return}
- if(d.sx!==undefined&&S.et==="sd"){if(!confirm("إعادة ضبط كل التحديدات لهذه الحلقة؟"))return;S.qa.filter(x=>x.epId===id).forEach(q=>{q.asked=false;q.cov=[];S.db.doc("qa/"+q.id).update({asked:false,cov:[]})});render();return}
- if(S.et!=="pt")return;
- const d0=scD(id),qs=S.qa.filter(x=>x.epId===id);
- if(d.scp!==undefined){const t=S.ep.find(x=>x.id===id),tt=scTot(d0,qs);navigator.clipboard.writeText((t?t.title+"\n":"")+d0.pl.map((n,i)=>n+": "+tt[i]).join("\n")).then(()=>toast("تم نسخ النتيجة"));return}
- if(!scOK()){toast("ما عندك صلاحية تسجيل النقاط");return}
- if(d.sl!==undefined){if(d0.lock&&!(S.canDel||role()==="manager")){toast("فتح النتيجة للمدير فقط");return}scSave(id,{lock:!d0.lock});return}
+/* ---- المتسابقون والنقاط ---- */
+S.pt=S.pt||[];
+const v3T=setInterval(()=>{if(S.db){clearInterval(v3T);sub("pts","pt")}},300);
+function ptD(id){const d=S.pt.find(x=>x.id===id)||{};let pl=d.pl&&d.pl.length?d.pl:null;if(!pl){pl=S.gs.filter(g=>g.epId===id).map(g=>({id:"g"+g.id,name:g.name}));if(!pl.length)pl=[{id:"p1",name:"المتسابق"}]}return{pl:pl,it:d.it||{},man:d.man||{},log:d.log||[],lock:!!d.lock}}
+function ptTot(d,qs){const t={};d.pl.forEach(p=>t[p.id]=+d.man[p.id]||0);qs.forEach(q=>{const r=d.it[q.id];if(r&&r.w&&t[r.w]!=null)t[r.w]+=(+r.p||1)});return t}
+function ptSave(id,o){const c=ptD(id),r=Object.assign({pl:c.pl,it:c.it,man:c.man,log:c.log,lock:c.lock},o,{updated:Date.now()}),i=S.pt.findIndex(x=>x.id===id),e=Object.assign({id:id},r);if(i<0)S.pt.push(e);else S.pt[i]=e;render();S.db.doc("pts/"+id).set(r).catch(()=>toast("تعذر الحفظ: لا توجد صلاحية"))}
+const ptOK=()=>S.canDel||(typeof perm==="function"?perm("ep","e"):true);
+function ptView(id,qs){const d=ptD(id),pl=d.pl,tot=ptTot(d,qs),vals=pl.map(p=>tot[p.id]),mx=Math.max.apply(null,vals),lead=mx>0&&vals.filter(v=>v===mx).length===1?vals.indexOf(mx):-1,dn=qs.filter(q=>d.it[q.id]&&d.it[q.id].w).length,dis=d.lock?"disabled":"";
+ const sg=S.sg.filter(x=>x.epId===id),od=q=>{const s=sg.find(x=>x.id===q.segId);return s?(+s.ord||99):999},L=qs.slice().sort((a,b)=>od(a)-od(b)||(a.created||0)-(b.created||0));
+ return(d.lock?'<div class="card" style="border-color:var(--gold);font-size:20px;text-align:center">🏆 '+(lead>=0?"الفائز: <b>"+esc(pl[lead].name)+"</b> بـ "+mx+" نقطة":"النتيجة النهائية: تعادل")+"</div>":"")
+ +'<div class="sbd">'+pl.map((p,i)=>'<div class="sbc '+(lead===i?"lead":"")+'"><div style="cursor:pointer;color:var(--mu)" data-pn="'+p.id+'">'+esc(p.name)+' ✎</div><div class="sbig">'+tot[p.id]+'</div><div class="bar"><button '+dis+' data-pm="'+p.id+'|-1">−1</button><button '+dis+' data-pm="'+p.id+'|1">+1</button><button '+dis+' data-pm="'+p.id+'|2">+2</button><button '+dis+' class="dng" data-pd="'+p.id+'">🗑</button></div></div>').join("")+"</div>"
+ +'<div class="card" style="font-size:13px;color:var(--mu)">المتسابقون فقط يدخلون الحساب (المقدم خارج اللعب). حُسم '+dn+" من "+qs.length+" سؤال</div>"
+ +'<div class="bar"><button class="pri" '+dis+' data-pa="1">+ متسابق</button><button data-pu="1" '+dis+'>↩ تراجع</button><button data-pc="1">📋 نسخ النتيجة</button><button data-pl="1">'+(d.lock?"🔓 فتح النتيجة":"🏁 إنهاء وقفل")+'</button><button class="dng" '+dis+' data-p0="1">تصفير</button></div>'
+ +(L.length?L.map((q,i)=>{const r=d.it[q.id]||{},pt=r.p||1,bk=bank(q);return '<div class="card" style="border-right:5px solid '+(r.w?"var(--grn)":"var(--line)")+'"><b>'+(i+1)+". "+esc(q.q)+'</b><div class="bar"><span class="tag">النقاط</span>'+[1,2,3,5].map(p=>'<button class="sp '+(pt===p?"on":"")+'" '+dis+' data-pp="'+q.id+"|"+p+'">'+p+"</button>").join("")+'</div><div class="bar">'+pl.map(p=>'<button class="sa '+(r.w===p.id?"on":"")+'" '+dis+' data-pw="'+q.id+"|"+p.id+'">✔ '+esc(p.name)+"</button>").join("")+'<button class="sa '+(r.w==="-"?"on":"")+'" '+dis+' data-pw="'+q.id+'|-">✘ لا أحد</button></div>'+(bk.length?'<div style="color:var(--mu);font-size:13px">الإجابة: '+bk.slice(0,2).map(a=>esc(a.t)).join(" / ")+"</div>":"")+"</div>"}).join(""):'<div class="empty">ما فيه أسئلة. أضف أسئلة الحلقة أولًا.</div>')
+ +(d.log.length?'<div class="card"><b>آخر العمليات</b>'+d.log.slice(-6).reverse().map(l=>'<div style="font-size:13px">'+esc(l.txt)+"</div>").join("")+"</div>":"")}
+function ptClick(b,id){const k=Object.keys(b.dataset)[0],v=b.dataset[k],d0=ptD(id),qs=S.qa.filter(x=>x.epId===id);
+ if(k==="pc"){const e=S.ep.find(x=>x.id===id),t=ptTot(d0,qs);navigator.clipboard.writeText((e?e.title+"\n":"")+d0.pl.map(p=>p.name+": "+t[p.id]).join("\n")).then(()=>toast("تم نسخ النتيجة"));return}
+ if(!ptOK()){toast("ما عندك صلاحية تسجيل النقاط");return}
+ if(k==="pl"){if(d0.lock&&!(S.canDel||role()==="manager")){toast("فتح النتيجة للمدير فقط");return}ptSave(id,{lock:!d0.lock});return}
  if(d0.lock){toast("النتيجة مقفلة، افتحها أولًا");return}
- const it={...d0.it},man={...d0.man},log=[...d0.log],pl=[...d0.pl],now=Date.now();
- if(d.sn!==undefined){const v=prompt("اسم اللاعب",pl[+d.sn]);if(v&&v.trim()){pl[+d.sn]=v.trim();scSave(id,{pl})}return}
- if(d.sa!==undefined){const v=prompt("اسم اللاعب الجديد");if(v&&v.trim()&&pl.length<4){pl.push(v.trim());scSave(id,{pl})}return}
- if(d.s0!==undefined){if(confirm("تصفير كل النقاط؟")&&confirm("متأكد؟ ما يمكن التراجع عن التصفير")){scSave(id,{it:{},man:{},log:[]})}return}
- if(d.su!==undefined){const l=log.pop();if(!l){toast("لا توجد عمليات للتراجع");return}if(l.k==="q"){if(l.prev)it[l.qid]=l.prev;else delete it[l.qid]}else man[l.pi]=(+man[l.pi]||0)-l.d;scSave(id,{it,man,log});return}
- if(d.sm!==undefined){const[pi,dl]=d.sm.split("|");man[pi]=(+man[pi]||0)+ +dl;log.push({k:"m",pi:+pi,d:+dl,t:now,txt:pl[+pi]+" "+(+dl>0?"+":"")+dl});scSave(id,{man,log});return}
- if(d.aw!==undefined){const[qi,pi]=d.aw.split("|"),p=+pi,prev=it[qi]||null,r=prev||{p:1},q=S.qa.find(x=>x.id===qi),tx=((q&&q.q)||"").slice(0,26);
-  if(r.w===p){it[qi]={p:r.p||1,w:null};log.push({k:"q",qid:qi,prev,t:now,txt:"إلغاء: "+tx})}else{it[qi]={p:r.p||1,w:p};log.push({k:"q",qid:qi,prev,t:now,txt:tx+" ← "+(p>=0?pl[p]:"لا أحد")+(p>=0?" (+"+(r.p||1)+")":"")})}
-  scSave(id,{it,log});return}
- if(d.pt!==undefined){const[qi,p]=d.pt.split("|"),prev=it[qi]||null;it[qi]={w:prev?prev.w:null,p:+p};log.push({k:"q",qid:qi,prev,t:now,txt:"نقاط السؤال "+p});scSave(id,{it,log})}});
-/* ===== نهاية ورقة التصوير والنقاط ===== */
+ const it=Object.assign({},d0.it),man=Object.assign({},d0.man),log=d0.log.slice(),pl=d0.pl.slice(),now=Date.now(),nm1=i=>(pl.find(p=>p.id===i)||{}).name||"";
+ if(k==="pa"){const n=prompt("اسم المتسابق الجديد");if(n&&n.trim()&&pl.length<20){pl.push({id:"p"+now,name:n.trim()});ptSave(id,{pl:pl})}return}
+ if(k==="pn"){const p=pl.find(x=>x.id===v),n=p&&prompt("اسم المتسابق",p.name);if(n&&n.trim()){p.name=n.trim();ptSave(id,{pl:pl})}return}
+ if(k==="pd"){if(pl.length<=1){toast("لازم يبقى متسابق واحد على الأقل");return}if(!confirm("حذف المتسابق "+nm1(v)+"؟ تنحذف نقاطه.")||!confirm("متأكد من الحذف؟"))return;Object.keys(it).forEach(q=>{if(it[q].w===v)it[q]=Object.assign({},it[q],{w:null})});delete man[v];ptSave(id,{pl:pl.filter(p=>p.id!==v),it:it,man:man});return}
+ if(k==="p0"){if(confirm("تصفير كل النقاط؟")&&confirm("متأكد؟ ما يمكن التراجع"))ptSave(id,{it:{},man:{},log:[]});return}
+ if(k==="pu"){const l=log.pop();if(!l){toast("لا توجد عمليات للتراجع");return}if(l.k==="q"){if(l.prev)it[l.qid]=l.prev;else delete it[l.qid]}else man[l.pid]=(+man[l.pid]||0)-l.d;ptSave(id,{it:it,man:man,log:log});return}
+ if(k==="pm"){const a=v.split("|"),dl=+a[1];man[a[0]]=(+man[a[0]]||0)+dl;log.push({k:"m",pid:a[0],d:dl,txt:nm1(a[0])+" "+(dl>0?"+":"")+dl});ptSave(id,{man:man,log:log});return}
+ if(k==="pw"){const a=v.split("|"),qi=a[0],w=a[1],prev=it[qi]||null,r=prev||{p:1},q=S.qa.find(x=>x.id===qi),tx=((q&&q.q)||"").slice(0,26);
+  if(r.w===w){it[qi]={p:r.p||1,w:null};log.push({k:"q",qid:qi,prev:prev,txt:"إلغاء: "+tx})}else{it[qi]={p:r.p||1,w:w};log.push({k:"q",qid:qi,prev:prev,txt:tx+" ← "+(w==="-"?"لا أحد":nm1(w))})}
+  ptSave(id,{it:it,log:log});return}
+ if(k==="pp"){const a=v.split("|"),prev=it[a[0]]||null;it[a[0]]={w:prev?prev.w:null,p:+a[1]};log.push({k:"q",qid:a[0],prev:prev,txt:"نقاط السؤال "+a[1]});ptSave(id,{it:it,log:log})}}
+
+/* ---- ورقة التصوير: أسئلة ثم بطاقة لكل سؤال مع كشف التكرار ---- */
+studio=function(id,qs){const sg=S.sg.filter(x=>x.epId===id).sort(v3ord),k=qs.filter(x=>x.asked).length;let n=0;
+ const row=q=>{n++;const sd=(q.said||[]).filter(e=>!e.rep).length,rp=(q.said||[]).filter(e=>e.rep).length;return '<div class="it qrow '+(q.asked?"dn":"")+'" data-qc="'+q.id+'"><span class="qn">'+n+'</span><span style="flex:1">'+esc(q.q)+"</span>"+(q.asked?'<span class="tag">☑ طُرح</span>':"")+'<span class="tag">'+sd+"/"+bank(q).length+"</span>"+(rp?'<span class="tag late">🔁 '+rp+"</span>":"")+"</div>"},
+ o=qs.filter(x=>!sg.some(s=>s.id===x.segId));
+ return '<div class="card">طُرح '+k+" من "+qs.length+' سؤال — اضغط السؤال لتفتح بطاقته<div class="pg"><i style="width:'+(qs.length?Math.round(k/qs.length*100):0)+'%"></i></div><div class="bar"><button data-sx="1">إعادة ضبط الحلقة</button></div></div>'
+ +(qs.length?sg.map(s=>{const l=qs.filter(x=>x.segId===s.id);return l.length?'<div class="card"><b>'+(s.ord?esc(s.ord)+". ":"")+esc(s.title)+"</b>"+l.map(row).join("")+"</div>":""}).join("")+(o.length?'<div class="card"><b>بدون فقرة</b>'+o.map(row).join("")+"</div>":""):'<div class="empty">أضف أسئلة من تبويب الفقرات والأسئلة.</div>')};
+let v3q="",v3cp="";
+function v3chk(q,t){const bk=bank(q),said=(q.said||[]).filter(e=>!e.rep);if(!String(t).trim())return{st:"empty"};let bi=-1,bs=0;bk.forEach((a,i)=>{const r=cmp(t,a.t);if(r.s>=0.6&&r.n&&r.s>bs){bs=r.s;bi=i}});
+ const dup=said.find(e=>(bi>=0&&e.i===bi)||(bi<0&&(e.i==null)&&sim(e.t,t)>=0.8));
+ return dup?{st:"rep",i:bi,by:dup.by,t:dup.t}:bi>=0?{st:"new",i:bi,t:bk[bi].t}:{st:"none"}}
+function v3open(qid){v3q=qid;let d=$("v3c");if(!d){d=document.createElement("dialog");d.id="v3c";document.body.appendChild(d);d.addEventListener("click",v3cc);d.addEventListener("input",v3ci);d.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="v3in"){e.preventDefault();v3rec(null)}});d.addEventListener("close",()=>{v3q=""})}
+ d.innerHTML='<div id="v3h"></div><input id="v3in" class="vq" autocomplete="off" placeholder="اكتب إجابة المتسابق…"><div id="v3s"></div><div id="v3d"></div>';v3cr();if(!d.open){if(d.showModal)d.showModal();else d.setAttribute("open","")}}
+function v3cr(){const d=$("v3c"),q=S.qa.find(x=>x.id===v3q);if(!d||!q)return;const pl=ptD(q.epId).pl;if(!pl.find(p=>p.id===v3cp))v3cp=pl[0].id;
+ const said=q.said||[],bk=bank(q),sg=S.sg.find(g=>g.id===q.segId);
+ $("v3h").innerHTML='<div class="bar"><button data-cx="1">✕ إغلاق</button><button data-cask="1" class="'+(q.asked?"on":"")+'">'+(q.asked?"☑ تم طرحه":"☐ تم طرحه")+"</button>"+(sg?'<span class="tag">'+esc(sg.title)+"</span>":"")+"</div><h2>"+esc(q.q)+'</h2><div class="bar">'+pl.map(p=>'<button class="cc '+(p.id===v3cp?"on":"")+'" data-cpl="'+p.id+'">'+esc(p.name)+"</button>").join("")+"</div>";
+ $("v3d").innerHTML=(bk.length?bk.map((a,i)=>{const s=said.find(e=>!e.rep&&e.i===i),r=said.filter(e=>e.rep&&e.i===i).length;return '<button class="ca '+(s?"sd":"")+(r?" rp":"")+'" data-cbk="'+i+'"><span style="font-size:24px">'+(s?"☑":"☐")+'</span><span style="flex:1">'+esc(a.t)+(a.src?' <span class="tag">'+esc(a.src)+"</span>":"")+"</span>"+(s?'<span class="tag">'+esc(s.by||"")+"</span>":"")+(r?'<span class="tag late">🔁 '+r+"</span>":"")+"</button>"}).join(""):'<div class="tag late">⚠️ لا توجد إجابات في البنك لهذا السؤال</div>')
+  +'<div class="card" style="margin-top:12px"><b>سجل الإجابات ('+said.length+')</b>'+(said.slice().reverse().map(e=>'<div style="'+(e.rep?"color:var(--red)":"")+'">'+(e.rep?"🔁 مكررة":"✔")+" "+esc(e.t)+(e.by?" — "+esc(e.by):"")+(e.i==null?' <span class="tag">خارج البنك</span>':"")+"</div>").join("")||'<div class="tag">لا شي بعد</div>')+'<div class="bar"><button data-cundo="1">↩ تراجع آخر إجابة</button><button class="dng" data-cclr="1">مسح السجل</button></div></div>';
+ v3ss()}
+function v3ss(){const q=S.qa.find(x=>x.id===v3q),i=$("v3in"),s=$("v3s");if(!q||!s)return;const r=v3chk(q,i?i.value:"");
+ s.innerHTML=r.st==="empty"?"":r.st==="rep"?'<div class="vbig2" style="color:var(--red);border:3px solid var(--red);border-radius:12px;padding:12px;margin:8px 0;font-size:20px;font-weight:700">🔁 مكررة — قالها '+esc(r.by||"أحد المتسابقين")+'<div class="bar"><button data-crec="1">سجّلها كمحاولة مكررة</button></div></div>':r.st==="new"?'<div style="color:var(--grn);border:3px solid var(--grn);border-radius:12px;padding:12px;margin:8px 0;font-size:20px;font-weight:700">✅ جديدة — تطابق: '+esc(r.t)+'<div class="bar"><button class="pri" data-crec="1">تسجيل</button></div></div>':'<div style="color:var(--gold);border:3px solid var(--gold);border-radius:12px;padding:12px;margin:8px 0;font-size:20px;font-weight:700">⚠️ ليست في بنك الإجابات<div class="bar"><button data-crec="1">سجّلها كإجابة خارج البنك</button></div></div>'}
+function v3ci(e){if(e.target.id==="v3in")v3ss()}
+function v3rec(idx){const q=S.qa.find(x=>x.id===v3q);if(!q)return;const bk=bank(q),inp=$("v3in"),t=inp?inp.value:"";let r;
+ if(idx!=null){const dup=(q.said||[]).find(e=>!e.rep&&e.i===idx);r=dup?{st:"rep",i:idx,by:dup.by}:{st:"new",i:idx}}else r=v3chk(q,t);if(r.st==="empty")return;
+ const by=(ptD(q.epId).pl.find(p=>p.id===v3cp)||{}).name||"",hasI=r.i!=null&&r.i>=0,e={i:hasI?r.i:null,t:hasI?bk[r.i].t:t.trim(),by:by,rep:r.st==="rep",at:Date.now()};
+ if(r.st==="rep"){toast("🔁 مكرر — قالها "+(r.by||"أحد المتسابقين"));if(navigator.vibrate){try{navigator.vibrate(200)}catch(x){}}}else if(r.st==="none")toast("سُجّلت كإجابة خارج البنك");
+ q.said=(q.said||[]).concat([e]);S.db.doc("qa/"+q.id).update({said:q.said}).catch(()=>toast("ما عندك صلاحية"));if(inp)inp.value="";v3cr()}
+function v3cc(ev){const b=ev.target.closest("button");if(!b)return;const q=S.qa.find(x=>x.id===v3q),d=b.dataset;if(!q)return;
+ if(d.cx)$("v3c").close();
+ else if(d.cpl){v3cp=d.cpl;v3cr()}
+ else if(d.cbk!==undefined)v3rec(+d.cbk);
+ else if(d.crec)v3rec(null);
+ else if(d.cask){q.asked=!q.asked;S.db.doc("qa/"+q.id).update({asked:q.asked}).catch(()=>{});v3cr();render()}
+ else if(d.cundo){q.said=(q.said||[]).slice(0,-1);S.db.doc("qa/"+q.id).update({said:q.said});v3cr()}
+ else if(d.cclr){if(confirm("مسح كل الإجابات المسجلة لهذا السؤال؟")){q.said=[];S.db.doc("qa/"+q.id).update({said:[]});v3cr()}}}
+if(!window.__v3reg){window.__v3reg=1;$("app").addEventListener("click",ev=>{const c=ev.target.closest("[data-qc]");if(c){v3open(c.dataset.qc);return}
+ if(!S.cur){return}if(ev.target.closest("[data-sx]")&&S.et==="sd"){if(!confirm("إعادة ضبط كل التحديدات والإجابات المسجلة لهذه الحلقة؟"))return;S.qa.filter(x=>x.epId===S.cur).forEach(q=>{q.asked=false;q.said=[];S.db.doc("qa/"+q.id).update({asked:false,said:[]})});render();return}
+ if(S.et!=="p3")return;const b=ev.target.closest("[data-pa],[data-pn],[data-pd],[data-pm],[data-pw],[data-pp],[data-pu],[data-pc],[data-pl],[data-p0]");if(b)ptClick(b,S.cur)})}
+const v3e=epPage;
+epPage=function(){const h=v3e(),i=h.indexOf("</nav>");if(!S.cur||i<0)return h;let hd=h.slice(0,i).replace(/<button[^>]*data-et="pt"[^>]*>[^<]*<\/button>/,"");hd+='<button class="'+(S.et==="p3"?"on":"")+'" data-et="p3">🏆 النقاط</button></nav>';if(S.et!=="p3")return hd+h.slice(i+6);return hd+ptView(S.cur,S.qa.filter(x=>x.epId===S.cur))};
+const v3r=render;
+render=function(k){v3r(k);const d=$("v3c");if(v3q&&d&&d.open)v3cr()};
+/* ===== نهاية النسخة الثالثة ===== */
   (async()=>{
  render();
  try{
