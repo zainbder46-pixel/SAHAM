@@ -534,6 +534,23 @@ function v3ci(e){if(e.target.id==="v3in")v3cr()}
 const v3rec0=v3rec;
 v3rec=function(idx){if(idx==null){const q=S.qa.find(x=>x.id===v3q),inp=$("v3in");if(q&&inp&&inp.value.trim()){const ts=v3t(inp.value),bk=bank(q),m=bk.map((a,i)=>i).filter(i=>v3has(bk[i].t,ts));if(m.length===1){inp.value="";v3rec0(m[0]);return}if(m.length>1){toast("أكثر من إجابة تطابق، اختر وحدة منها");return}}}v3rec0(idx)};
 /* ===== نهاية البحث الفوري في البطاقة ===== */
+/* ===== VAR: البحث داخل كل سؤال ===== */
+const v3run0=v3run;
+const v3cur=()=>{const q=S.qa.find(x=>x.id===S.sel);return q&&v3sc().includes(q)?q:null};
+refV=function(){const q=v3cur();return(S.scoped?segChips():tgl(1))+(q?'<div class="card" style="border-color:var(--gold)"><div class="bar"><button data-vback="1">← أسئلة الفقرة</button><span class="tag">'+bank(q).length+' إجابة</span></div><h2 style="margin:6px 0;line-height:1.5">'+esc(q.q)+"</h2></div>":"")+'<input id="vq" class="vq" autocomplete="off" placeholder="'+(q?"ابحث داخل إجابات هذا السؤال…":"ابحث في أسئلة وإجابات النطاق، أو اضغط سؤالًا لتبحث داخله")+'" value="'+esc(S.vq||"")+'"><div id="vc" style="color:var(--mu);font-size:13px;margin:4px 0"></div><div id="vr"></div>'};
+v3run=function(v){const ts=v3t(v),q=v3cur(),o=$("vr"),c=$("vc");
+ if(q){const bk=bank(q),am=bk.map(a=>v3has(a.t,ts)),idx=bk.map((_,i)=>i).sort((a,b)=>(am[b]?1:0)-(am[a]?1:0)),n=am.filter(Boolean).length;
+  c.textContent=ts.length?n+" من "+bk.length+" إجابة تطابق":bk.length+" إجابة";
+  o.innerHTML=bk.length?idx.map(i=>'<div class="va" style="'+(ts.length&&!am[i]?"opacity:.4;border-color:var(--line)":"")+'">'+v3hl(bk[i].t,ts)+(bk[i].src?' <span class="tag">'+esc(bk[i].src)+"</span>":"")+"</div>").join("")+(ts.length&&!n?'<div class="empty">ما فيه إجابة بهالحروف داخل هذا السؤال.</div>':""):'<div class="tag late">لا توجد إجابات في بنك هذا السؤال</div>';return}
+ if(!ts.length){const pool=v3sc();c.textContent=pool.length+" سؤال — اضغط سؤالًا للبحث داخل إجاباته";o.innerHTML=pool.length?pool.map((x,i)=>'<div class="it qrow" data-vq="'+x.id+'"><span class="qn">'+(i+1)+'</span><span style="flex:1">'+esc(x.q)+'</span><span class="tag">'+bank(x).length+" إجابة</span></div>").join(""):'<div class="empty">ما فيه أسئلة في هذا النطاق.</div>';return}
+ v3run0(v);o.querySelectorAll("[data-vopen]").forEach(b=>b.insertAdjacentHTML("beforebegin",'<button data-vq="'+b.dataset.vopen+'">🎯 ابحث داخل هذا السؤال</button>'))};
+bindV=function(){document.querySelectorAll("[data-m2]").forEach(b=>b.onclick=()=>{S.m=b.dataset.m2;render()});
+ document.querySelectorAll("[data-vs]").forEach(b=>b.onclick=()=>{S.vs=b.dataset.vs;S.sel="";S.vq="";render()});
+ document.querySelectorAll("[data-vback]").forEach(b=>b.onclick=()=>{S.sel="";S.vq="";render()});
+ const i=$("vq");if(!i)return;i.oninput=()=>{S.vq=i.value;v3run(i.value)};
+ $("vr").onclick=e=>{const b=e.target.closest("[data-vopen],[data-vq]");if(!b)return;if(b.dataset.vq){S.sel=b.dataset.vq;S.vq="";render()}else openForm("qa",S.qa.find(x=>x.id===b.dataset.vopen))};
+ v3run(i.value);i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch(x){}};
+/* ===== نهاية VAR داخل كل سؤال ===== */
   (async()=>{
  render();
  try{
