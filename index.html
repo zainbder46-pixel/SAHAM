@@ -418,6 +418,57 @@ applyPerms=function(){_ap3();Object.keys(ROLES).forEach(k=>{if(k!=="off"&&/\bep\
 const _render6=render;
 render=function(keep){try{_render6(keep)}catch(e){try{nav()}catch(x){}$("app").innerHTML='<div class="card" style="border-color:var(--red)">⚠️ خطأ في الصفحة: '+esc(e.message)+'<br>أرسل لي هذا النص</div>'}};
 /* ===== نهاية الإصلاح ===== */
+ /* ===== ورقة التصوير الجديدة + تبويب النقاط ===== */
+const _sty=document.createElement("style");
+_sty.textContent=`.sq{display:flex;gap:10px;align-items:flex-start;font-size:17px;cursor:pointer;padding:6px 0}.bx{font-size:26px;line-height:1}.stq{border-right:5px solid var(--line)}.stq.done{border-right-color:var(--grn)}.stq.done .sq b{opacity:.55;text-decoration:line-through}.sa2{display:flex;gap:10px;align-items:flex-start;padding:10px;margin-top:6px;border:1px solid var(--line);border-radius:10px;cursor:pointer}.sa2.on{border-color:var(--grn);background:var(--bg)}.sa2 input{width:22px;height:22px;flex:none}.sbd{position:sticky;top:calc(env(safe-area-inset-top,0px) + 58px);z-index:4;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;background:var(--bg);padding:8px 0}.sbc{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center}.sbc.lead{border-color:var(--gold)}.sbn{color:var(--mu);cursor:pointer}.sbig{font-size:54px;font-weight:800;color:var(--gold);line-height:1.1}.sbc .bar{justify-content:center;margin:6px 0 0}.sa.on,.sp.on{background:var(--gold);color:#111;border-color:var(--gold);font-weight:700}.sa{flex:1;min-width:90px;padding:12px 8px}`;
+document.head.appendChild(_sty);
+
+studio=function(id,qs){const sg=S.sg.filter(x=>x.epId===id).sort((a,b)=>(+a.ord||99)-(+b.ord||99)),all=qs.reduce((a,q)=>a+bank(q).length,0),cvd=qs.reduce((a,q)=>a+(q.cov||[]).length,0),k=qs.filter(x=>x.asked).length;let n=0;
+const card=q=>{n++;const bk=bank(q),cs=q.cov||[];return `<div class="card stq ${q.asked?"done":""}"><div class="sq" data-ask="${q.id}"><span class="bx">${q.asked?"☑":"☐"}</span><b>${n}. ${esc(q.q)}</b></div>${bk.length?bk.map((a,i)=>{const on=cs.includes(norm(a.t));return `<label class="sa2 ${on?"on":""}"><input type="checkbox" data-cov="${q.id}|${i}" ${on?"checked":""}><span>${esc(a.t)}${a.src?` <span class="tag">${esc(a.src)}</span>`:""}</span></label>`}).join(""):'<div class="tag late" style="margin-top:6px">⚠️ لا توجد إجابات في البنك</div>'}<div class="bar"><button onclick="S.et='var';S.vs='${q.segId||""}';S.sel='${q.id}';render()">🎬 VAR</button></div></div>`};
+const grp=(t,l)=>l.length?`<div style="margin-top:14px"><h3 style="color:var(--gold);margin:6px 0">${t}</h3>${l.map(card).join("")}</div>`:"";
+const o=qs.filter(x=>!sg.some(s=>s.id===x.segId));
+return `<div class="card"><b>طُرح ${k} من ${qs.length} سؤال · غُطّيت ${cvd} من ${all} إجابة</b><div class="pg"><i style="width:${qs.length?Math.round(k/qs.length*100):0}%"></i></div><div class="bar"><button data-sx="1">إعادة ضبط التحديد</button></div></div>`+(qs.length?sg.map(s=>grp((s.ord?s.ord+". ":"")+esc(s.title)+(s.dur?` (${esc(s.dur)} د)`:""),qs.filter(x=>x.segId===s.id))).join("")+grp("بدون فقرة",o):'<div class="empty">أضف أسئلة من تبويب الفقرات والأسئلة.</div>')};
+
+S.sc=[];
+const scT=setInterval(()=>{if(S.db){clearInterval(scT);sub("scores","sc")}},300);
+const scGet=id=>S.sc.find(x=>x.id===id)||{};
+const scD=id=>{const d=scGet(id);return{pl:d.pl&&d.pl.length?d.pl:["المقدم","الضيف"],it:d.it||{},man:d.man||{},log:d.log||[],lock:!!d.lock}};
+const scTot=(d,qs)=>{const t=d.pl.map(()=>0);qs.forEach(q=>{const r=d.it[q.id];if(r&&r.w!=null&&r.w>=0&&r.w<t.length)t[r.w]+=+r.p||1});d.pl.forEach((_,i)=>t[i]+=+d.man[i]||0);return t};
+function scSave(id,o){const r={...scGet(id),...o,updated:Date.now()};delete r.id;const i=S.sc.findIndex(x=>x.id===id),e={...r,id};if(i<0)S.sc.push(e);else S.sc[i]=e;render();S.db.doc("scores/"+id).set(r).catch(()=>toast("تعذر الحفظ: لا توجد صلاحية"))}
+const scOK=()=>S.canDel||(typeof perm==="function"?perm("ep","e"):true);
+
+function scoreView(id,qs){const d=scD(id),pl=d.pl,tot=scTot(d,qs),mx=Math.max(...tot),lead=mx>0&&tot.filter(t=>t===mx).length===1?tot.indexOf(mx):-1,dn=qs.filter(q=>d.it[q.id]&&d.it[q.id].w!=null).length;
+const sg=S.sg.filter(x=>x.epId===id),ord=q=>{const s=sg.find(x=>x.id===q.segId);return s?(+s.ord||99):999},L=[...qs].sort((a,b)=>ord(a)-ord(b)||(a.created||0)-(b.created||0)),dis=d.lock?"disabled":"";
+return (d.lock?`<div class="card" style="border-color:var(--gold);font-size:20px;text-align:center">🏆 ${lead>=0?"الفائز: <b>"+esc(pl[lead])+"</b> بـ "+mx+" نقطة":"النتيجة النهائية: تعادل"}</div>`:"")+
+`<div class="sbd">${pl.map((n,i)=>`<div class="sbc ${lead===i?"lead":""}"><div class="sbn" data-sn="${i}">${esc(n)} ✎</div><div class="sbig">${tot[i]}</div><div class="bar"><button ${dis} data-sm="${i}|-1">−1</button><button ${dis} data-sm="${i}|1">+1</button><button ${dis} data-sm="${i}|2">+2</button></div></div>`).join("")}</div>
+<div class="card" style="font-size:13px;color:var(--mu)">حُسم ${dn} من ${qs.length} سؤال · اضغط اسم اللاعب لتغييره</div>
+<div class="bar">${pl.length<4&&!d.lock?'<button data-sa="1">+ لاعب</button>':""}<button data-su="1" ${dis}>↩ تراجع آخر عملية</button><button data-scp="1">📋 نسخ النتيجة</button><button data-sl="1">${d.lock?"🔓 فتح النتيجة":"🏁 إنهاء الحلقة وقفل النتيجة"}</button><button class="dng" data-s0="1" ${dis}>تصفير</button></div>`+
+(L.length?L.map((q,i)=>{const r=d.it[q.id]||{},pt=r.p||1,bk=bank(q);return `<div class="card" style="border-right:5px solid ${r.w!=null?"var(--grn)":"var(--line)"}"><b>${i+1}. ${esc(q.q)}</b><div class="bar"><span class="tag">النقاط</span>${[1,2,3,5].map(p=>`<button class="sp ${pt===p?"on":""}" ${dis} data-pt="${q.id}|${p}">${p}</button>`).join("")}</div><div class="bar">${pl.map((n,j)=>`<button class="sa ${r.w===j?"on":""}" ${dis} data-aw="${q.id}|${j}">✔ ${esc(n)}</button>`).join("")}<button class="sa ${r.w===-1?"on":""}" ${dis} data-aw="${q.id}|-1">✘ لا أحد</button></div>${bk.length?`<div style="color:var(--mu);font-size:13px">الإجابة: ${bk.slice(0,2).map(a=>esc(a.t)).join(" / ")}</div>`:""}</div>`}).join(""):'<div class="empty">ما فيه أسئلة. أضف أسئلة الحلقة أولًا.</div>')+
+(d.log.length?`<div class="card"><b>آخر العمليات</b>${d.log.slice(-6).reverse().map(l=>`<div style="font-size:13px">${esc(l.txt)}</div>`).join("")}</div>`:"")}
+
+const _epS=epPage;
+epPage=function(){const h=_epS(),i=h.indexOf("</nav>");if(!S.cur||i<0)return h;const btn=`<button class="${S.et==="pt"?"on":""}" data-et="pt">🏆 النقاط</button>`,hd=h.slice(0,i)+btn+"</nav>";if(S.et!=="pt")return hd+h.slice(i+6);return hd+scoreView(S.cur,S.qa.filter(x=>x.epId===S.cur))};
+
+$("app").addEventListener("click",ev=>{if(!S.cur)return;const b=ev.target.closest("[data-cov],[data-sx],[data-aw],[data-pt],[data-sm],[data-sn],[data-sa],[data-su],[data-sl],[data-s0],[data-scp]");if(!b)return;const id=S.cur,d=b.dataset;
+ if(d.cov!==undefined&&S.et==="sd"){const[qi,i]=d.cov.split("|"),q=S.qa.find(x=>x.id===qi),a=q&&bank(q)[+i];if(!a)return;const k=norm(a.t),c=q.cov||[],n=c.includes(k)?c.filter(x=>x!==k):[...c,k];q.cov=n;render();S.db.doc("qa/"+qi).update({cov:n}).catch(()=>toast("ما عندك صلاحية"));return}
+ if(d.sx!==undefined&&S.et==="sd"){if(!confirm("إعادة ضبط كل التحديدات لهذه الحلقة؟"))return;S.qa.filter(x=>x.epId===id).forEach(q=>{q.asked=false;q.cov=[];S.db.doc("qa/"+q.id).update({asked:false,cov:[]})});render();return}
+ if(S.et!=="pt")return;
+ const d0=scD(id),qs=S.qa.filter(x=>x.epId===id);
+ if(d.scp!==undefined){const t=S.ep.find(x=>x.id===id),tt=scTot(d0,qs);navigator.clipboard.writeText((t?t.title+"\n":"")+d0.pl.map((n,i)=>n+": "+tt[i]).join("\n")).then(()=>toast("تم نسخ النتيجة"));return}
+ if(!scOK()){toast("ما عندك صلاحية تسجيل النقاط");return}
+ if(d.sl!==undefined){if(d0.lock&&!(S.canDel||role()==="manager")){toast("فتح النتيجة للمدير فقط");return}scSave(id,{lock:!d0.lock});return}
+ if(d0.lock){toast("النتيجة مقفلة، افتحها أولًا");return}
+ const it={...d0.it},man={...d0.man},log=[...d0.log],pl=[...d0.pl],now=Date.now();
+ if(d.sn!==undefined){const v=prompt("اسم اللاعب",pl[+d.sn]);if(v&&v.trim()){pl[+d.sn]=v.trim();scSave(id,{pl})}return}
+ if(d.sa!==undefined){const v=prompt("اسم اللاعب الجديد");if(v&&v.trim()&&pl.length<4){pl.push(v.trim());scSave(id,{pl})}return}
+ if(d.s0!==undefined){if(confirm("تصفير كل النقاط؟")&&confirm("متأكد؟ ما يمكن التراجع عن التصفير")){scSave(id,{it:{},man:{},log:[]})}return}
+ if(d.su!==undefined){const l=log.pop();if(!l){toast("لا توجد عمليات للتراجع");return}if(l.k==="q"){if(l.prev)it[l.qid]=l.prev;else delete it[l.qid]}else man[l.pi]=(+man[l.pi]||0)-l.d;scSave(id,{it,man,log});return}
+ if(d.sm!==undefined){const[pi,dl]=d.sm.split("|");man[pi]=(+man[pi]||0)+ +dl;log.push({k:"m",pi:+pi,d:+dl,t:now,txt:pl[+pi]+" "+(+dl>0?"+":"")+dl});scSave(id,{man,log});return}
+ if(d.aw!==undefined){const[qi,pi]=d.aw.split("|"),p=+pi,prev=it[qi]||null,r=prev||{p:1},q=S.qa.find(x=>x.id===qi),tx=((q&&q.q)||"").slice(0,26);
+  if(r.w===p){it[qi]={p:r.p||1,w:null};log.push({k:"q",qid:qi,prev,t:now,txt:"إلغاء: "+tx})}else{it[qi]={p:r.p||1,w:p};log.push({k:"q",qid:qi,prev,t:now,txt:tx+" ← "+(p>=0?pl[p]:"لا أحد")+(p>=0?" (+"+(r.p||1)+")":"")})}
+  scSave(id,{it,log});return}
+ if(d.pt!==undefined){const[qi,p]=d.pt.split("|"),prev=it[qi]||null;it[qi]={w:prev?prev.w:null,p:+p};log.push({k:"q",qid:qi,prev,t:now,txt:"نقاط السؤال "+p});scSave(id,{it,log})}});
+/* ===== نهاية ورقة التصوير والنقاط ===== */
   (async()=>{
  render();
  try{
