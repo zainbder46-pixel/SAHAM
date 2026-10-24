@@ -518,6 +518,22 @@ epPage=function(){const h=v3e(),i=h.indexOf("</nav>");if(!S.cur||i<0)return h;le
 const v3r=render;
 render=function(k){v3r(k);const d=$("v3c");if(v3q&&d&&d.open)v3cr()};
 /* ===== نهاية النسخة الثالثة ===== */
+ /* ===== بحث فوري داخل بطاقة السؤال ===== */
+v3cr=function(){const d=$("v3c"),q=S.qa.find(x=>x.id===v3q);if(!d||!q)return;const pl=ptD(q.epId).pl;if(!pl.find(p=>p.id===v3cp))v3cp=pl[0].id;
+ const said=q.said||[],bk=bank(q),sg=S.sg.find(g=>g.id===q.segId),inp=$("v3in"),ts=v3t(inp?inp.value:"");
+ $("v3h").innerHTML='<div class="bar"><button data-cx="1">✕ إغلاق</button><button data-cask="1" class="'+(q.asked?"on":"")+'">'+(q.asked?"☑ تم طرحه":"☐ تم طرحه")+"</button>"+(sg?'<span class="tag">'+esc(sg.title)+"</span>":"")+"</div><h2>"+esc(q.q)+'</h2><div class="bar">'+pl.map(p=>'<button class="cc '+(p.id===v3cp?"on":"")+'" data-cpl="'+p.id+'">'+esc(p.name)+"</button>").join("")+"</div>";
+ const idx=bk.map((a,i)=>i).filter(i=>v3has(bk[i].t,ts)),hid=bk.length-idx.length;
+ $("v3d").innerHTML=(bk.length?idx.map(i=>{const a=bk[i],s=said.find(e=>!e.rep&&e.i===i),r=said.filter(e=>e.rep&&e.i===i).length;return '<button class="ca '+(s?"sd":"")+(r?" rp":"")+'" data-cbk="'+i+'"><span style="font-size:24px">'+(s?"☑":"☐")+'</span><span style="flex:1">'+v3hl(a.t,ts)+(a.src?' <span class="tag">'+esc(a.src)+"</span>":"")+"</span>"+(s?'<span class="tag">'+esc(s.by||"")+"</span>":"")+(r?'<span class="tag late">🔁 '+r+"</span>":"")+"</button>"}).join("")+(hid?'<div class="tag" style="margin-top:6px">+'+hid+" إجابات أخرى ما تطابق ما كتبت</div>":""):'<div class="tag late">⚠️ لا توجد إجابات في البنك لهذا السؤال</div>')
+  +'<div class="card" style="margin-top:12px"><b>سجل الإجابات ('+said.length+')</b>'+(said.slice().reverse().map(e=>'<div style="'+(e.rep?"color:var(--red)":"")+'">'+(e.rep?"🔁 مكررة":"✔")+" "+esc(e.t)+(e.by?" — "+esc(e.by):"")+(e.i==null?' <span class="tag">خارج البنك</span>':"")+"</div>").join("")||'<div class="tag">لا شي بعد</div>')+'<div class="bar"><button data-cundo="1">↩ تراجع آخر إجابة</button><button class="dng" data-cclr="1">مسح السجل</button></div></div>';
+ v3ss()};
+v3ss=function(){const q=S.qa.find(x=>x.id===v3q),i=$("v3in"),s=$("v3s");if(!q||!s)return;const t=i?i.value:"",ts=v3t(t);if(!ts.length){s.innerHTML="";return}
+ const bk=bank(q),mi=bk.map((a,i)=>i).filter(i=>v3has(bk[i].t,ts)),m=mi.length,dup=m===1?(q.said||[]).find(e=>!e.rep&&e.i===mi[0]):null;
+ if(dup){s.innerHTML='<div style="color:var(--red);border:3px solid var(--red);border-radius:12px;padding:12px;margin:8px 0;font-size:20px;font-weight:700">🔁 مكررة — قالها '+esc(dup.by||'أحد المتسابقين')+'</div>';return}
+ s.innerHTML=m?'<div style="color:var(--mu);font-size:13px;margin:6px 0">'+m+" إجابة تطابق — اضغط الإجابة لتسجيلها"+(m===1?" أو اضغط Enter":"")+"</div>":'<div style="color:var(--gold);border:3px solid var(--gold);border-radius:12px;padding:12px;margin:8px 0;font-size:18px;font-weight:700">⚠️ ما فيه إجابة بهالحروف في البنك<div class="bar"><button data-crec="1">سجّلها كإجابة خارج البنك</button></div></div>'};
+function v3ci(e){if(e.target.id==="v3in")v3cr()}
+const v3rec0=v3rec;
+v3rec=function(idx){if(idx==null){const q=S.qa.find(x=>x.id===v3q),inp=$("v3in");if(q&&inp&&inp.value.trim()){const ts=v3t(inp.value),bk=bank(q),m=bk.map((a,i)=>i).filter(i=>v3has(bk[i].t,ts));if(m.length===1){inp.value="";v3rec0(m[0]);return}if(m.length>1){toast("أكثر من إجابة تطابق، اختر وحدة منها");return}}}v3rec0(idx)};
+/* ===== نهاية البحث الفوري في البطاقة ===== */
   (async()=>{
  render();
  try{
